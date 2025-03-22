@@ -6,10 +6,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -25,28 +27,31 @@ import org.antlr.v4.runtime.misc.NotNull;
 public class Event {
 
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+  private UUID uuid = UUID.randomUUID();
 
   private String name;
   private String description;
   private LocalDateTime creationDate;
 
   @NotNull
-  private Long creatorId;
+
+  private UUID creatorUUID = UUID.randomUUID();
 
   private LocalDateTime registrationEndDate;
   private LocalDateTime startDate;
   private LocalDateTime endDate;
 
   private int capacity;
+  @NotNull
   private double price;
   @ManyToOne
-  @JoinColumn(name = "status_id", referencedColumnName = "id")
   private EventStatus status;
-  @ManyToOne()
+  @ManyToOne
   private EventCategory eventCategory;
 
-  @OneToMany
+  @OneToMany(mappedBy = "event")
   Set<Agenda> Agends;
+
+  @Lob
+  private byte[] profilePicture;
 }
