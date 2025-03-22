@@ -1,59 +1,57 @@
 package org.app.authservice.service;
 
 import jakarta.annotation.PostConstruct;
-import org.app.authservice.entity.Role;
+import jakarta.validation.Valid;
+import org.app.authservice.dto.UserDTO;
+import org.app.authservice.dto.UserListDTO;
+import org.app.authservice.dto.UserResponseDTO;
 import org.app.authservice.entity.User;
-import org.app.authservice.entity.UserRole;
-import org.app.authservice.respository.RoleRepository;
 import org.app.authservice.respository.UserRepository;
-import org.app.authservice.respository.UserRoleRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 public class UserService {
 
 
-  private final UserRepository userRepository;
-  private final UserRoleRepository userRoleRepository;
-  private final RoleRepository roleRepository;
+    private final UserRepository userRepository;
+    private final UserMapperService userMapperService;
 
-  public UserService(UserRepository userRepository, UserRoleRepository userRoleRepository, RoleRepository roleRepository) {
-    this.userRepository = userRepository;
-    this.userRoleRepository = userRoleRepository;
-    this.roleRepository = roleRepository;
-  }
+    public UserService(UserRepository userRepository, UserMapperService userMapperService) {
+        this.userRepository = userRepository;
+        this.userMapperService = userMapperService;
+    }
 
-  @PostConstruct
-  public void init() {
-/*
-    //set roles
-    Role adminRole = new Role();
-    adminRole.setName("ADMIN");
-    roleRepository.save(adminRole);
+    @PostConstruct
+    public void init() {
 
-    Role userRole = new Role();
-    userRole.setName("USER");
-    roleRepository.save(userRole);
+    }
 
-    User user1 = new User();
-    user1.setFirstName("John");
+    public List<UserListDTO> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        if (users.isEmpty()) {
+            throw new RuntimeException("No users found");
+        }
+        return userMapperService.toDtoList(users);
+    }
 
-    user1.setLastName("Doe");
-    user1.setEmail("john.doe@example.com");
-    user1.setPassword("password123");
-    user1.setBio("A regular user.");
-    userRepository.save(user1);
+    @Transactional
+    public UserResponseDTO createUser(@Valid UserDTO userDTO) {
+        if (userDTO.getFirstName() == null || userDTO.getLastName() == null || userDTO.getEmail() == null || userDTO.getPassword() == null) {
+            throw new IllegalArgumentException("One or more required fields are missing");
+        }
 
-    UserRole userRole1 = new UserRole();
-    userRole1.setRole(userRole);
-    userRole1.setUser(user1);
-    userRoleRepository.save(userRole1);
+        if (userRepository.existsByEmail(userDTO.getEmail())) {
+            throw new IllegalArgumentException("User with this email already exists");
+        }
 
-    System.out.println("Saved data successfully");
+        User user = userMapperService.toEntity(userDTO);
+        User savedUser = userRepository.save(user);
 
-*/
-  }
+        return userMapperService.toResponseDto(savedUser, "User created successfully");
+    }
 
 
 }
