@@ -26,7 +26,7 @@ public class UserService {
 
   @PostConstruct
   public void init() {
-
+/*
     //set roles
     Role adminRole = new Role();
     adminRole.setName("ADMIN");
@@ -52,7 +52,7 @@ public class UserService {
 
     System.out.println("Saved data successfully");
 
-
+*/
   }
 
 
