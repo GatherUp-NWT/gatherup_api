@@ -6,7 +6,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import java.util.Set;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,10 +18,15 @@ import org.antlr.v4.runtime.misc.NotNull;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+
+@Table(name = "\"user\"")
 public class User {
+
+
+
   @Id
-  @GeneratedValue(strategy = GenerationType.IDENTITY)
-  private Long id;
+
+  private UUID uuid = UUID.randomUUID();
 
   @NotNull
   private String firstName;
@@ -33,4 +40,6 @@ public class User {
 
   @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
   private Set<UserRole> userRoles;
+
+
 }

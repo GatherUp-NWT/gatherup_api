@@ -3,7 +3,7 @@
   <component name="CompilerConfiguration">
     <annotationProcessing>
       <profile default="true" name="Default" enabled="true" />
-      <profile name="Annotation profile for ReviewService" enabled="true">
+      <profile name="Annotation profile for InvitationService" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -12,8 +12,8 @@
         </processorPath>
         <module name="EventService" />
         <module name="RegistrationService" />
-        <module name="ReviewService" />
         <module name="InvitationService" />
+        <module name="ReviewService" />
         <module name="PaymentService" />
         <module name="AuthService" />
       </profile>
