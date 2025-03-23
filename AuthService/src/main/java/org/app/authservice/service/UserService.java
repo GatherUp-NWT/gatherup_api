@@ -46,7 +46,7 @@ public class UserService {
         User user = userMapperService.toEntity(userDTO);
         User savedUser = userRepository.save(user);
 
-        return userMapperService.toResponseDto(savedUser, "User created successfully");
+        return userMapperService.toResponseDto(savedUser, "true", "User created successfully");
     }
 
 

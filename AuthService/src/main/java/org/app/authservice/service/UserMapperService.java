@@ -80,9 +80,10 @@ public class UserMapperService {
                 .toList();
     }
 
-    public UserResponseDTO toResponseDto(User user, String status) {
+    public UserResponseDTO toResponseDto(User user, String status, String message) {
         UserResponseDTO responseDTO = modelMapper.map(user, UserResponseDTO.class);
         responseDTO.setStatus(status);
+        responseDTO.setMessage(message);
         return responseDTO;
     }
 }

@@ -11,5 +11,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class UserResponseDTO {
     private String status;
+    private String message;
     private UUID uuid;
 }
