@@ -38,9 +38,6 @@ public class UserService {
 
     @Transactional
     public UserResponseDTO createUser(UserDTO userDTO) {
-        if (userDTO.getFirstName() == null || userDTO.getLastName() == null || userDTO.getEmail() == null || userDTO.getPassword() == null) {
-            throw new IllegalArgumentException("One or more required fields are missing");
-        }
 
         if (userRepository.existsByEmail(userDTO.getEmail())) {
             throw new IllegalArgumentException("User with this email already exists");

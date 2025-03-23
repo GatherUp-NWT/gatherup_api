@@ -59,7 +59,9 @@ public class UserMapperService {
         Role role = roleRepository.findByName(roleName)
                 .orElseThrow(() -> new IllegalArgumentException("Role not found: " + roleName));
 
-        user.getUserRoles().clear(); // Clear existing roles
+        if (user.getUserRoles() != null) {
+            user.getUserRoles().clear();
+        }
 
         UserRole userRole = new UserRole();
         userRole.setUser(user);
