@@ -1,7 +1,6 @@
 package org.app.authservice.service;
 
 import jakarta.annotation.PostConstruct;
-import jakarta.validation.Valid;
 import org.app.authservice.dto.UserDTO;
 import org.app.authservice.dto.UserListDTO;
 import org.app.authservice.dto.UserResponseDTO;
@@ -38,7 +37,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponseDTO createUser(@Valid UserDTO userDTO) {
+    public UserResponseDTO createUser(UserDTO userDTO) {
         if (userDTO.getFirstName() == null || userDTO.getLastName() == null || userDTO.getEmail() == null || userDTO.getPassword() == null) {
             throw new IllegalArgumentException("One or more required fields are missing");
         }

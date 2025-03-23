@@ -1,5 +1,6 @@
 package org.app.authservice.controller;
 
+import jakarta.validation.Valid;
 import org.app.authservice.dto.UserDTO;
 import org.app.authservice.dto.UserListDTO;
 import org.app.authservice.dto.UserResponseDTO;
@@ -27,7 +28,7 @@ public class UserController {
     }
 
     @PostMapping("/api/v1/users")
-    public UserResponseDTO createUser(@RequestBody UserDTO userDTO) {
+    public UserResponseDTO createUser(@Valid @RequestBody UserDTO userDTO) {
         return userService.createUser(userDTO);
     }
 }
