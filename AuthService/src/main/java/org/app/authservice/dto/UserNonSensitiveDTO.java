@@ -12,7 +12,7 @@ import java.util.UUID;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserListDTO {
+public class UserNonSensitiveDTO {
 
     @NotNull(message = "UUID is required")
     private UUID uuid;
