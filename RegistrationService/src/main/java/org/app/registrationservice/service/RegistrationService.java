@@ -1,35 +1,56 @@
 package org.app.registrationservice.service;
 
-
-import jakarta.annotation.PostConstruct;
-import java.time.LocalDateTime;
-import java.util.UUID;
+import lombok.RequiredArgsConstructor;
+import org.app.registrationservice.dto.RegistrationDTO;
 import org.app.registrationservice.entity.Registration;
+import org.app.registrationservice.mapper.RegistrationMapper;
 import org.app.registrationservice.repository.RegistrationRepository;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 @Service
+@RequiredArgsConstructor
 public class RegistrationService {
-
   private final RegistrationRepository registrationRepository;
+  private final RegistrationMapper registrationMapper;
 
-  public RegistrationService(RegistrationRepository registrationRepository) {
-    this.registrationRepository = registrationRepository;
+  public List<RegistrationDTO> getAllRegistrations() {
+    return registrationRepository.findAll()
+            .stream()
+            .map(registrationMapper::toDto)
+            .collect(Collectors.toList());
   }
 
-  @PostConstruct
-  public void initDatabase() {
-    if (registrationRepository.count() == 0) {
+  public RegistrationDTO getRegistrationById(Long id) {
+    return registrationRepository.findById(id)
+            .map(registrationMapper::toDto)
+            .orElseThrow(() -> new RuntimeException("Registration not found"));
+  }
 
+  public RegistrationDTO createRegistration(RegistrationDTO dto) {
+    Registration registration = registrationMapper.toEntity(dto);
+    return registrationMapper.toDto(registrationRepository.save(registration));
+  }
 
-      Registration r = new Registration();
-      r.setUserId(UUID.fromString("13004255-59fa-4df6-9ab8-34e40f7058bf"));
-      r.setEventId(UUID.fromString("df77cdec-e4d0-488e-99fe-210a4cada331"));
+  public void deleteRegistration(Long id) {
+    registrationRepository.deleteById(id);
+  }
 
+  public List<RegistrationDTO> getRegistrationsByUser(UUID userId) {
+    return registrationRepository.findByUserId(userId)
+            .stream()
+            .map(registrationMapper::toDto)
+            .collect(Collectors.toList());
+  }
 
-      registrationRepository.save(r);
-
-      System.out.println(" data populated!");
-    }
+  public List<RegistrationDTO> getRegistrationsByEvent(UUID eventId) {
+    return registrationRepository.findByEventId(eventId)
+            .stream()
+            .map(registrationMapper::toDto)
+            .collect(Collectors.toList());
   }
 }
+

@@ -1,39 +1,45 @@
 package org.app.reviewservice.service;
 
-
-
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.app.reviewservice.Rate;
+import org.app.reviewservice.dto.ReviewDTO;
 import org.app.reviewservice.entity.Review;
+import org.app.reviewservice.mapper.ReviewMapper;
 import org.app.reviewservice.repository.ReviewRepository;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.UUID;
+import java.util.List;
+import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class ReviewService {
-
   private final ReviewRepository reviewRepository;
+  private final ReviewMapper reviewMapper;
 
-  @PostConstruct
-  public void initDatabase() {
-    if (reviewRepository.count() == 0) { // Prevents duplicate inserts
-
-
-      Review review = new Review();
-      review.setUserId(UUID.fromString("13004255-59fa-4df6-9ab8-34e40f7058bf"));
-      review.setEventId(UUID.fromString("df77cdec-e4d0-488e-99fe-210a4cada331"));
-      review.setComment("Great event, very informative and well organized.");
-
-      review.setRate(Rate.VERY_GOOD);
-
-      reviewRepository.save(review);
-
-      System.out.println(" Review data populated!");
+    public ReviewService(ReviewRepository reviewRepository, ReviewMapper reviewMapper) {
+        this.reviewRepository = reviewRepository;
+        this.reviewMapper = reviewMapper;
     }
+
+    public List<ReviewDTO> getAllReviews() {
+    return reviewRepository.findAll().stream()
+            .map(reviewMapper::toDTO)
+            .toList();
+  }
+
+  public Optional<ReviewDTO> getReviewById(Long id) {
+    return reviewRepository.findById(id)
+            .map(reviewMapper::toDTO);
+  }
+
+  public ReviewDTO saveReview(ReviewDTO reviewDTO) {
+    Review review = reviewMapper.toEntity(reviewDTO);
+    review.setTimestamp(Timestamp.valueOf(LocalDateTime.now())); // Set current timestamp
+    return reviewMapper.toDTO(reviewRepository.save(review));
+  }
+
+  public void deleteReview(Long id) {
+    reviewRepository.deleteById(id);
   }
 }
-

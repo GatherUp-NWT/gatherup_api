@@ -4,7 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.security.Timestamp;
+import java.sql.Timestamp;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
