@@ -12,7 +12,7 @@
         </processorPath>
         <module name="AuthService" />
       </profile>
-      <profile name="Annotation profile for InvitationService" enabled="true">
+      <profile name="Annotation profile for PaymentService" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -22,11 +22,19 @@
           <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct-processor/1.5.5.Final/mapstruct-processor-1.5.5.Final.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/mapstruct/mapstruct/1.5.5.Final/mapstruct-1.5.5.Final.jar" />
         </processorPath>
-        <module name="EventService" />
-        <module name="RegistrationService" />
         <module name="InvitationService" />
-        <module name="ReviewService" />
         <module name="PaymentService" />
+      </profile>
+      <profile name="Annotation profile for ReviewService" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.36/lombok-1.18.36.jar" />
+        </processorPath>
+        <module name="RegistrationService" />
+        <module name="ReviewService" />
+        <module name="EventService" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
