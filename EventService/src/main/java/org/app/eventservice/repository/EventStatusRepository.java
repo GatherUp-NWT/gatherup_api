@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface EventStatusRepository  extends JpaRepository<EventStatus, Long> {
+    EventStatus findByName(String name);
 }

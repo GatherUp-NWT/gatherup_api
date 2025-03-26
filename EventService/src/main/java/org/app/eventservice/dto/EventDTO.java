@@ -1,30 +1,18 @@
-package org.app.eventservice.entity;
-
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
-
-import java.time.Instant;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+package org.app.eventservice.dto;
 
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
+import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
 
-@Entity
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "\"events\"")
-public class Event {
-
-    @Id
+public class EventDTO {
     private UUID uuid = UUID.randomUUID();
 
     @NotNull(message = "Event must have a name")
@@ -34,12 +22,10 @@ public class Event {
     @Size(max = 500, message = "Event description should be at most 500 characters")
     private String description;
 
-    @NotNull
-    private Instant creationDate;
-
-    @NotNull
+    @NotNull(message = "Event must specify which user created it")
     private UUID creatorUUID;
 
+    @NotNull(message = "Event must have a creation date")
     @NotNull(message = "Event must have registration due date")
     @FutureOrPresent(message = "Event registration due date must be in the future or present")
     private Instant registrationEndDate;
@@ -59,29 +45,9 @@ public class Event {
     @PositiveOrZero(message = "Event price must be positive or zero")
     private double price;
 
-    @ManyToOne
-    private EventStatus status;
-
-    @ManyToOne
-    private EventCategory eventCategory;
-
-    @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
-    private Set<Agenda> agendas = new HashSet<>();
-/*
-    @Lob
-    @Column(name = "event_banner", columnDefinition = "BYTEA")
-    private byte[] eventBanner;*/
-
-
-    public void addAgenda(Agenda agenda) {
-        agendas.add(agenda);
-        agenda.setEvent(this);
-    }
-
-    public void removeAgenda(Agenda agenda) {
-        agendas.remove(agenda);
-        agenda.setEvent(null);
-    }
+    private String status;
+    private String category;
+    private List<AgendaDTO> agendas;
+    //private String eventBanner;
 
 }
