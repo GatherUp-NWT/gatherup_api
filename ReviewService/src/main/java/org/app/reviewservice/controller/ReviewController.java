@@ -3,7 +3,6 @@ package org.app.reviewservice.controller;
 import org.app.reviewservice.dto.ReviewDTO;
 import org.app.reviewservice.service.ReviewService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;

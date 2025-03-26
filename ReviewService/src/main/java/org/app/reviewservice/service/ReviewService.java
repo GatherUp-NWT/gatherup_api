@@ -1,6 +1,5 @@
 package org.app.reviewservice.service;
 
-import lombok.RequiredArgsConstructor;
 import org.app.reviewservice.dto.ReviewDTO;
 import org.app.reviewservice.entity.Review;
 import org.app.reviewservice.mapper.ReviewMapper;
