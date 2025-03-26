@@ -8,7 +8,7 @@ import org.app.invitationservice.entity.EventInvite;
 import org.app.invitationservice.entity.Invitation;
 import org.app.invitationservice.entity.InvitationResponseType;
 import org.app.invitationservice.entity.UserInvite;
-import org.app.invitationservice.mapper.InvitationMapper;
+
 import org.app.invitationservice.repository.EventInviteRepository;
 import org.app.invitationservice.repository.InvitationRepository;
 import org.app.invitationservice.repository.UserInviteRepository;
@@ -78,7 +78,7 @@ public class InvitationService {
 
     Invitation invitation=invitationRepository.findByUserAndEventId(userId, eventId);
     if (!response.equalsIgnoreCase("ACCEPTED") && !response.equalsIgnoreCase("REJECTED")) {
-      throw new IllegalArgumentException("Invalid response type. Use 'ACCEPTED' or 'REJECTED'.");
+      throw new IllegalArgumentException("Invalid response type Use 'ACCEPTED' or 'REJECTED'.");
     }
     if(response.equalsIgnoreCase("ACCEPTED")){
     invitation.setInvitationResponseType(InvitationResponseType.ACCEPTED);}
