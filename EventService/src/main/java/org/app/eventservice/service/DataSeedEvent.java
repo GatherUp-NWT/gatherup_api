@@ -22,7 +22,7 @@ public class DataSeedEvent {
   private final LocationRepository locationRepository;
 
   @PostConstruct
-  public void initDatabase() {
+  public void initDatabase() {/*
     if (eventRepository.count() == 0) {
 
 
@@ -73,6 +73,6 @@ public class DataSeedEvent {
       eventRepository.save(event);
 
       System.out.println("Database populated with initial data!");
-    }
+    }*/
   }
 }

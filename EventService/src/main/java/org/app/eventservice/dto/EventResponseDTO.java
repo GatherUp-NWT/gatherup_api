@@ -1,4 +1,4 @@
-package org.app.authservice.dto;
+package org.app.eventservice.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,10 +7,10 @@ import lombok.NoArgsConstructor;
 import java.util.UUID;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class UserResponseDTO {
-    private String status;
+@NoArgsConstructor
+public class EventResponseDTO {
+    private Boolean status;
     private String message;
-    private UUID uuid;
+    private UUID eventUUID;
 }

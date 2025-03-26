@@ -22,6 +22,7 @@ public class SecurityConfig
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/users").permitAll() // Make this endpoint public
+                        .requestMatchers("/api/v1/users/**").permitAll() // Only Admin can access later
                         // Add other public endpoints as needed
                         .anyRequest().authenticated()
                 )
