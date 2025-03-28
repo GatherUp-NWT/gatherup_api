@@ -1,27 +1,32 @@
 package org.app.registrationservice.service;
 
-import lombok.RequiredArgsConstructor;
 import org.app.registrationservice.dto.RegistrationDTO;
 import org.app.registrationservice.entity.Registration;
 import org.app.registrationservice.mapper.RegistrationMapper;
 import org.app.registrationservice.repository.RegistrationRepository;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class RegistrationService {
   private final RegistrationRepository registrationRepository;
   private final RegistrationMapper registrationMapper;
 
-  public List<RegistrationDTO> getAllRegistrations() {
+    public RegistrationService(RegistrationRepository registrationRepository, RegistrationMapper registrationMapper) {
+        this.registrationRepository = registrationRepository;
+        this.registrationMapper = registrationMapper;
+    }
+
+    public List<RegistrationDTO> getAllRegistrations() {
     return registrationRepository.findAll()
             .stream()
             .map(registrationMapper::toDto)
-            .collect(Collectors.toList());
+            .toList();
   }
 
   public RegistrationDTO getRegistrationById(Long id) {
@@ -30,8 +35,9 @@ public class RegistrationService {
             .orElseThrow(() -> new RuntimeException("Registration not found"));
   }
 
-  public RegistrationDTO createRegistration(RegistrationDTO dto) {
+  public RegistrationDTO saveRegistration(RegistrationDTO dto) {
     Registration registration = registrationMapper.toEntity(dto);
+    registration.setTimestamp(Timestamp.valueOf(LocalDateTime.now())); // Set current timestamp
     return registrationMapper.toDto(registrationRepository.save(registration));
   }
 

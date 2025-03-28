@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/registrations")
+@RequestMapping("/api/v1/registrations")
 @RequiredArgsConstructor
 public class RegistrationController {
     private final RegistrationService registrationService;
@@ -27,7 +27,7 @@ public class RegistrationController {
 
     @PostMapping
     public ResponseEntity<RegistrationDTO> createRegistration(@RequestBody RegistrationDTO dto) {
-        return ResponseEntity.ok(registrationService.createRegistration(dto));
+        return ResponseEntity.ok(registrationService.saveRegistration(dto));
     }
 
     @DeleteMapping("/{id}")
