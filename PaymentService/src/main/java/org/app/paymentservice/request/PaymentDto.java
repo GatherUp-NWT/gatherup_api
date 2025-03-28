@@ -1,4 +1,13 @@
 package org.app.paymentservice.request;
 
-public record PaymentDto (){
+import java.util.UUID;
+import lombok.Data;
+import lombok.Getter;
+
+@Getter
+
+public class PaymentDto {
+  private  UUID userId;
+  private  UUID eventId;
+  private  Integer price;
 }

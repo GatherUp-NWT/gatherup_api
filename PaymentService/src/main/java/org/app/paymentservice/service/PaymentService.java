@@ -1,6 +1,8 @@
 package org.app.paymentservice.service;
 
 import jakarta.annotation.PostConstruct;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,6 +11,7 @@ import java.util.stream.Collectors;
 import org.app.paymentservice.entity.Ticket;
 import org.app.paymentservice.mapper.PaymentMapper;
 import org.app.paymentservice.repository.PaymentRepository;
+import org.app.paymentservice.request.PaymentDto;
 import org.app.paymentservice.response.PaymentModel;
 import org.springframework.stereotype.Service;
 
@@ -49,8 +52,8 @@ public class PaymentService {
     return payments.stream().map(paymentMapper::mapToModel).toList();
   }
 
-  public PaymentModel crateNewPayment(UUID userId, UUID eventId) {
-    PaymentModel newTicket=new PaymentModel(userId, eventId, LocalDateTime.now());
+  public PaymentModel crateNewPayment(PaymentDto paymentDto) {
+    PaymentModel newTicket=new PaymentModel(paymentDto.getUserId(), paymentDto.getEventId(), LocalDateTime.now(),paymentDto.getPrice());
     paymentRepository.save(paymentMapper.mapToTicket(newTicket));
     return newTicket;
   }
