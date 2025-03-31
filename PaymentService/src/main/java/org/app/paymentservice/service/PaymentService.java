@@ -1,18 +1,18 @@
 package org.app.paymentservice.service;
 
 import jakarta.annotation.PostConstruct;
-import java.math.BigDecimal;
-import java.math.BigInteger;
+import jakarta.transaction.Transactional;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import org.app.paymentservice.entity.Ticket;
 import org.app.paymentservice.mapper.PaymentMapper;
 import org.app.paymentservice.repository.PaymentRepository;
 import org.app.paymentservice.request.PaymentDto;
+import org.app.paymentservice.response.EventSold;
 import org.app.paymentservice.response.PaymentModel;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -44,25 +44,34 @@ public class PaymentService {
     }
   }
 
-  public List<PaymentModel> getAllPayments() {
-    List<Ticket> payments = (List<Ticket>) paymentRepository.findAll();
+  public Page<PaymentModel> getAllPayments(Pageable pageable) {
+    Page<Ticket> payments =  paymentRepository.findAll(pageable);
     if (payments.isEmpty()) {
       throw new RuntimeException("No payments found!");
     }
-    return payments.stream().map(paymentMapper::mapToModel).toList();
+    return payments.map(paymentMapper::mapToModel);
   }
 
+  @Transactional
   public PaymentModel crateNewPayment(PaymentDto paymentDto) {
     PaymentModel newTicket=new PaymentModel(paymentDto.getUserId(), paymentDto.getEventId(), LocalDateTime.now(),paymentDto.getPrice());
     paymentRepository.save(paymentMapper.mapToTicket(newTicket));
     return newTicket;
   }
 
-  public List<PaymentModel> getAllUserPayments(UUID userId) {
-    List<Ticket> payments =  paymentRepository.findByUserId(userId);
+  public Page<PaymentModel> getAllUserPayments(UUID userId ,Pageable pageable) {
+    Page<Ticket> payments =  paymentRepository.findByUserId(userId, pageable);
     if (payments.isEmpty()) {
       throw new RuntimeException("No payments found!");
     }
-    return payments.stream().map(paymentMapper::mapToModel).toList();
+    return payments.map(paymentMapper::mapToModel);
+  }
+
+  public EventSold getANumberOfSoldTicketsForEvent(UUID eventId) {
+    Ticket payment=paymentRepository.findByEventId(eventId);
+    if (payment==null) {
+      throw new RuntimeException("No payment found for event!");
+    }
+    return paymentRepository.getNumberOfTicketsSoldForEvent(eventId);
   }
 }
