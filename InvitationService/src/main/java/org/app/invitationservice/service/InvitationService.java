@@ -2,12 +2,16 @@
 package org.app.invitationservice.service;
 
 
+import jakarta.transaction.Transactional;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.app.invitationservice.entity.EventInvite;
 import org.app.invitationservice.entity.Invitation;
 import org.app.invitationservice.entity.InvitationResponseType;
+import org.app.invitationservice.entity.TimeStatus;
 import org.app.invitationservice.entity.UserInvite;
 
 import org.app.invitationservice.repository.EventInviteRepository;
@@ -15,6 +19,8 @@ import org.app.invitationservice.repository.InvitationRepository;
 import org.app.invitationservice.repository.UserInviteRepository;
 import org.app.invitationservice.request.InvitationRequest;
 import org.app.invitationservice.response.InvitationModel;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -28,7 +34,7 @@ public class InvitationService {
 
 
 
-
+@Transactional
   public InvitationModel sendInvitation(InvitationRequest invitationRequest) {
     UserInvite sender = userInviteRepository.findByUserId(invitationRequest.getSenderUserId())
         .orElseThrow(() -> new RuntimeException("Sender does not exist"));
@@ -45,6 +51,7 @@ public class InvitationService {
     invitation.setEvent(event);
     invitation.setSendDate(LocalDateTime.now());
     invitation.setInvitationResponseType(InvitationResponseType.PENDING);
+    invitation.setStatusInTime(TimeStatus.UPCOMING);
 
     invitationRepository.save(invitation);
 
@@ -60,11 +67,11 @@ public class InvitationService {
   }
 
 
-  public List<Invitation> getAllUserInvitations(Long userId) {
+  public Page<Invitation> getAllUserInvitations(Long userId, Pageable pageable) {
     UserInvite user = userInviteRepository.findById(userId)
         .orElseThrow(() -> new RuntimeException("User not found"));
 
-    List<Invitation> userInvitations = user.getReceivedInvitations();
+    Page<Invitation> userInvitations = invitationRepository.getReceivedInvitations(userId, pageable);
 
     if (userInvitations.isEmpty()) {
       throw new RuntimeException("No invitations found");
