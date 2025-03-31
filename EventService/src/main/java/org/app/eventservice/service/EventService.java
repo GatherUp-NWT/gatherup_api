@@ -49,8 +49,6 @@ public class EventService {
         // Validate event data
         if (event.getStartDate().isAfter(event.getEndDate())) {
             throw new IllegalArgumentException("Event start date cannot be after end date");
-        } else if (event.getEndDate().isBefore(event.getStartDate())) {
-            throw new IllegalArgumentException("Event end date cannot be before start date");
         }
 
         Event createdEvent = eventMapper.toEntity(event);
@@ -63,8 +61,6 @@ public class EventService {
     public EventResponseDTO updateEvent(EventUpdateDTO event) {
         if (event.getStartDate().isAfter(event.getEndDate())) {
             throw new IllegalArgumentException("Event start date cannot be after end date");
-        } else if (event.getEndDate().isBefore(event.getStartDate())) {
-            throw new IllegalArgumentException("Event end date cannot be before start date");
         }
 
         Event existingEvent = eventRepository.findById(event.getUuid())
