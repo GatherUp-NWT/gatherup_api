@@ -9,6 +9,11 @@ import org.app.reviewservice.repository.ReviewRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,6 +25,7 @@ import java.util.stream.Collectors;
 @Validated
 @Service
 public class ReviewService {
+
   private final ReviewRepository reviewRepository;
   private final ReviewMapper reviewMapper;
 
@@ -28,7 +34,29 @@ public class ReviewService {
         this.reviewMapper = reviewMapper;
     }
 
-    public List<ReviewDTO> getAllReviews() {
+  public Page<ReviewDTO> getReviews(int page, int size, String sortBy, String sortOrder) {
+    Sort.Direction direction = Sort.Direction.ASC;
+
+    if ("desc".equalsIgnoreCase(sortOrder)) {
+      direction = Sort.Direction.DESC;
+    }
+
+    Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortBy));
+
+    Page<Review> reviewPage = reviewRepository.findAll(pageable);
+
+    return reviewPage.map(review -> new ReviewDTO(
+            review.getId(),
+            review.getUserId(),
+            review.getEventId(),
+            review.getComment(),
+            review.getTimestamp(),
+            review.getRate()
+    ));
+  }
+
+
+  public List<ReviewDTO> getAllReviews() {
     return reviewRepository.findAll().stream()
             .map(reviewMapper::toDTO)
             .toList();

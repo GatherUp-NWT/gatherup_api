@@ -3,6 +3,7 @@ package org.app.reviewservice.controller;
 import jakarta.validation.Valid;
 import org.app.reviewservice.dto.ReviewDTO;
 import org.app.reviewservice.service.ReviewService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -55,6 +56,16 @@ public class ReviewController {
     @GetMapping("/event/{eventId}")
     public List<ReviewDTO> getReviewsByEvent(@PathVariable UUID eventId) {
         return reviewService.getReviewsByEvent(eventId);
+    }
+
+    @GetMapping("/sorted/")
+    public Page<ReviewDTO> getReviews(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortOrder) {
+
+        return reviewService.getReviews(page, size, sortBy, sortOrder);
     }
 }
 
