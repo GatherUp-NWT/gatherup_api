@@ -39,6 +39,15 @@ public class ReviewController {
         reviewService.deleteReview(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<ReviewDTO> patchReview(
+            @PathVariable Long id,
+            @RequestBody ReviewDTO reviewDTO) {
+
+        ReviewDTO updatedReview = reviewService.patchReview(id, reviewDTO);
+        return ResponseEntity.ok(updatedReview);
+    }
 }
 
 

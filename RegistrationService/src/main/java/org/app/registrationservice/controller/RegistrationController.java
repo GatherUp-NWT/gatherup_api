@@ -46,4 +46,11 @@ public class RegistrationController {
     public List<RegistrationDTO> getRegistrationsByEvent(@PathVariable UUID eventId) {
         return registrationService.getRegistrationsByEvent(eventId);
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<RegistrationDTO> patchRegistration(@PathVariable Long id, @RequestBody RegistrationDTO registrationDTO) {
+        RegistrationDTO updatedRegistration = registrationService.patchRegistration(id, registrationDTO);
+        return ResponseEntity.ok(updatedRegistration);
+    }
 }
+

@@ -56,4 +56,27 @@ public class ReviewService {
     }
     reviewRepository.deleteById(id);
   }
+
+  public ReviewDTO patchReview(Long id, ReviewDTO reviewDTO) {
+    Review existingReview = reviewRepository.findById(id)
+            .orElseThrow(() -> new NoSuchElementException("Review not found"));
+
+    if (reviewDTO.getComment() != null) {
+      existingReview.setComment(reviewDTO.getComment());
+    }
+
+    if (reviewDTO.getRate() != null) {
+      existingReview.setRate(reviewDTO.getRate());
+    }
+
+    if (reviewDTO.getEventId() != null) {
+      existingReview.setEventId(reviewDTO.getEventId());
+    }
+    if (reviewDTO.getUserId() != null) {
+      existingReview.setUserId(reviewDTO.getUserId());
+    }
+
+    Review updatedReview = reviewRepository.save(existingReview);
+    return reviewMapper.toDTO(updatedReview);
+  }
 }

@@ -69,5 +69,20 @@ public class RegistrationService {
             .map(registrationMapper::toDto)
             .collect(Collectors.toList());
   }
+
+  public RegistrationDTO patchRegistration(Long id, RegistrationDTO registrationDTO) {
+    Registration existingRegistration = registrationRepository.findById(id)
+            .orElseThrow(() -> new NoSuchElementException("Registration not found"));
+
+    if (registrationDTO.getEventId() != null) {
+      existingRegistration.setEventId(registrationDTO.getEventId());
+    }
+    if (registrationDTO.getUserId() != null) {
+      existingRegistration.setUserId(registrationDTO.getUserId());
+    }
+
+    Registration updatedRegistration = registrationRepository.save(existingRegistration);
+    return registrationMapper.toDto(updatedRegistration);
+  }
 }
 
