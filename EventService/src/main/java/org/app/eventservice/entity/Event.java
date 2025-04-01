@@ -1,6 +1,5 @@
 package org.app.eventservice.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
@@ -79,9 +78,5 @@ public class Event {
         agenda.setEvent(this);
     }
 
-    public void removeAgenda(Agenda agenda) {
-        agendas.remove(agenda);
-        agenda.setEvent(null);
-    }
 
 }
