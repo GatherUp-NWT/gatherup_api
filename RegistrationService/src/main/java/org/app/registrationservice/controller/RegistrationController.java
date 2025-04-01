@@ -1,5 +1,6 @@
 package org.app.registrationservice.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.app.registrationservice.dto.RegistrationDTO;
 import org.app.registrationservice.service.RegistrationService;
@@ -26,7 +27,7 @@ public class RegistrationController {
     }
 
     @PostMapping
-    public ResponseEntity<RegistrationDTO> createRegistration(@RequestBody RegistrationDTO dto) {
+    public ResponseEntity<RegistrationDTO> createRegistration(@Valid @RequestBody RegistrationDTO dto) {
         return ResponseEntity.ok(registrationService.saveRegistration(dto));
     }
 

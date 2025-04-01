@@ -1,7 +1,9 @@
 package org.app.registrationservice.service;
 
+import jakarta.validation.Valid;
 import org.app.registrationservice.dto.RegistrationDTO;
 import org.app.registrationservice.entity.Registration;
+import org.app.registrationservice.exception.ConflictException;
 import org.app.registrationservice.mapper.RegistrationMapper;
 import org.app.registrationservice.repository.RegistrationRepository;
 import org.springframework.stereotype.Service;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Service;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -32,17 +35,25 @@ public class RegistrationService {
   public RegistrationDTO getRegistrationById(Long id) {
     return registrationRepository.findById(id)
             .map(registrationMapper::toDto)
-            .orElseThrow(() -> new RuntimeException("Registration not found"));
+            .orElseThrow(() -> new NoSuchElementException("Registration not found"));
   }
 
-  public RegistrationDTO saveRegistration(RegistrationDTO dto) {
-    Registration registration = registrationMapper.toEntity(dto);
+  public RegistrationDTO saveRegistration(@Valid RegistrationDTO registrationDTO) {
+    boolean exists = registrationRepository.existsByUserIdAndEventId(registrationDTO.getUserId(), registrationDTO.getEventId());
+
+    if (exists) {
+      throw new ConflictException("User has already created a registration for this event.");
+    }
+    Registration registration = registrationMapper.toEntity(registrationDTO);
     registration.setTimestamp(Timestamp.valueOf(LocalDateTime.now())); // Set current timestamp
     return registrationMapper.toDto(registrationRepository.save(registration));
   }
 
   public void deleteRegistration(Long id) {
-    registrationRepository.deleteById(id);
+    if (!registrationRepository.existsById(id)) {
+      throw new NoSuchElementException("Registration with ID " + id + " does not exist");
+    }
+      registrationRepository.deleteById(id);
   }
 
   public List<RegistrationDTO> getRegistrationsByUser(UUID userId) {

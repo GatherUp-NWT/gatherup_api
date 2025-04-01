@@ -1,5 +1,6 @@
 package org.app.reviewservice.controller;
 
+import jakarta.validation.Valid;
 import org.app.reviewservice.dto.ReviewDTO;
 import org.app.reviewservice.service.ReviewService;
 import org.springframework.http.ResponseEntity;
@@ -8,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;
 
 import org.springframework.web.bind.annotation.*;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("api/v1/reviews")
@@ -26,13 +26,11 @@ public class ReviewController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ReviewDTO> getReviewById(@PathVariable Long id) {
-        Optional<ReviewDTO> reviewDTO = reviewService.getReviewById(id);
-        return reviewDTO.map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        return ResponseEntity.ok(reviewService.getReviewById(id));
     }
 
     @PostMapping
-    public ReviewDTO createReview(@RequestBody ReviewDTO reviewDTO) {
+    public ReviewDTO createReview(@Valid @RequestBody ReviewDTO reviewDTO) {
         return reviewService.saveReview(reviewDTO);
     }
 
