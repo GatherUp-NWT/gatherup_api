@@ -53,5 +53,11 @@ public class RegistrationController {
         RegistrationDTO updatedRegistration = registrationService.patchRegistration(id, registrationDTO);
         return ResponseEntity.ok(updatedRegistration);
     }
+
+    @PostMapping("/batch")
+    public ResponseEntity<List<RegistrationDTO>> batchCreateRegistrations(@Valid @RequestBody List<RegistrationDTO> registrationDTOs) {
+        List<RegistrationDTO> savedRegistrations = registrationService.batchSaveRegistrations(registrationDTOs);
+        return ResponseEntity.ok(savedRegistrations);
+    }
 }
 

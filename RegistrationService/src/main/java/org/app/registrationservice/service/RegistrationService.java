@@ -7,6 +7,7 @@ import org.app.registrationservice.exception.ConflictException;
 import org.app.registrationservice.mapper.RegistrationMapper;
 import org.app.registrationservice.repository.RegistrationRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
@@ -83,6 +84,26 @@ public class RegistrationService {
 
     Registration updatedRegistration = registrationRepository.save(existingRegistration);
     return registrationMapper.toDto(updatedRegistration);
+  }
+
+  @Transactional
+  public List<RegistrationDTO> batchSaveRegistrations(List<RegistrationDTO> registrationDTOs) {
+    List<Registration> registrations = registrationDTOs.stream()
+            .map(dto -> {
+              if (registrationRepository.existsByUserIdAndEventId(dto.getUserId(), dto.getEventId())) {
+                throw new ConflictException("User " + dto.getUserId() + " is already registered for event " + dto.getEventId());
+              }
+              Registration registration = registrationMapper.toEntity(dto);
+              registration.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
+              return registration;
+            })
+            .collect(Collectors.toList());
+
+    List<Registration> savedRegistrations = registrationRepository.saveAll(registrations);
+
+    return savedRegistrations.stream()
+            .map(registrationMapper::toDto)
+            .collect(Collectors.toList());
   }
 }
 
