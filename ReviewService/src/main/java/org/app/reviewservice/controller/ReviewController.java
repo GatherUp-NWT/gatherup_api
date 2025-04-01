@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.web.bind.annotation.*;
 
@@ -47,6 +48,16 @@ public class ReviewController {
 
         ReviewDTO updatedReview = reviewService.patchReview(id, reviewDTO);
         return ResponseEntity.ok(updatedReview);
+    }
+
+    @GetMapping("/user/{userId}")
+    public List<ReviewDTO> getReviewsByUser(@PathVariable UUID userId) {
+        return reviewService.getReviewsByUser(userId);
+    }
+
+    @GetMapping("/event/{eventId}")
+    public List<ReviewDTO> getReviewsByEvent(@PathVariable UUID eventId) {
+        return reviewService.getReviewsByEvent(eventId);
     }
 }
 

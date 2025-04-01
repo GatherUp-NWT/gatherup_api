@@ -14,6 +14,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Validated
 @Service
@@ -78,5 +80,19 @@ public class ReviewService {
 
     Review updatedReview = reviewRepository.save(existingReview);
     return reviewMapper.toDTO(updatedReview);
+  }
+
+  public List<ReviewDTO> getReviewsByUser(UUID userId) {
+    return reviewRepository.findByUserId(userId)
+            .stream()
+            .map(reviewMapper::toDTO)
+            .collect(Collectors.toList());
+  }
+
+  public List<ReviewDTO> getReviewsByEvent(UUID eventId) {
+    return reviewRepository.findByEventId(eventId)
+            .stream()
+            .map(reviewMapper::toDTO)
+            .collect(Collectors.toList());
   }
 }
