@@ -42,10 +42,7 @@ public class ReviewController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<ReviewDTO> patchReview(
-            @PathVariable Long id,
-            @RequestBody ReviewDTO reviewDTO) {
-
+    public ResponseEntity<ReviewDTO> patchReview(@PathVariable Long id, @RequestBody ReviewDTO reviewDTO) {
         ReviewDTO updatedReview = reviewService.patchReview(id, reviewDTO);
         return ResponseEntity.ok(updatedReview);
     }
