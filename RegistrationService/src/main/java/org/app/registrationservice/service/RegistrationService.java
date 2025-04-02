@@ -1,42 +1,60 @@
 package org.app.registrationservice.service;
 
-import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.app.registrationservice.dto.RegistrationDTO;
 import org.app.registrationservice.entity.Registration;
+import org.app.registrationservice.exception.ConflictException;
 import org.app.registrationservice.mapper.RegistrationMapper;
 import org.app.registrationservice.repository.RegistrationRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor
 public class RegistrationService {
   private final RegistrationRepository registrationRepository;
   private final RegistrationMapper registrationMapper;
 
-  public List<RegistrationDTO> getAllRegistrations() {
+    public RegistrationService(RegistrationRepository registrationRepository, RegistrationMapper registrationMapper) {
+        this.registrationRepository = registrationRepository;
+        this.registrationMapper = registrationMapper;
+    }
+
+    public List<RegistrationDTO> getAllRegistrations() {
     return registrationRepository.findAll()
             .stream()
             .map(registrationMapper::toDto)
-            .collect(Collectors.toList());
+            .toList();
   }
 
   public RegistrationDTO getRegistrationById(Long id) {
     return registrationRepository.findById(id)
             .map(registrationMapper::toDto)
-            .orElseThrow(() -> new RuntimeException("Registration not found"));
+            .orElseThrow(() -> new NoSuchElementException("Registration not found"));
   }
 
-  public RegistrationDTO createRegistration(RegistrationDTO dto) {
-    Registration registration = registrationMapper.toEntity(dto);
+  public RegistrationDTO saveRegistration(@Valid RegistrationDTO registrationDTO) {
+    boolean exists = registrationRepository.existsByUserIdAndEventId(registrationDTO.getUserId(), registrationDTO.getEventId());
+
+    if (exists) {
+      throw new ConflictException("User has already created a registration for this event.");
+    }
+    Registration registration = registrationMapper.toEntity(registrationDTO);
+    registration.setTimestamp(Timestamp.valueOf(LocalDateTime.now())); // Set current timestamp
     return registrationMapper.toDto(registrationRepository.save(registration));
   }
 
   public void deleteRegistration(Long id) {
-    registrationRepository.deleteById(id);
+    if (!registrationRepository.existsById(id)) {
+      throw new NoSuchElementException("Registration with ID " + id + " does not exist");
+    }
+      registrationRepository.deleteById(id);
   }
 
   public List<RegistrationDTO> getRegistrationsByUser(UUID userId) {
@@ -49,6 +67,41 @@ public class RegistrationService {
   public List<RegistrationDTO> getRegistrationsByEvent(UUID eventId) {
     return registrationRepository.findByEventId(eventId)
             .stream()
+            .map(registrationMapper::toDto)
+            .collect(Collectors.toList());
+  }
+
+  public RegistrationDTO patchRegistration(Long id, RegistrationDTO registrationDTO) {
+    Registration existingRegistration = registrationRepository.findById(id)
+            .orElseThrow(() -> new NoSuchElementException("Registration not found"));
+
+    if (registrationDTO.getEventId() != null) {
+      existingRegistration.setEventId(registrationDTO.getEventId());
+    }
+    if (registrationDTO.getUserId() != null) {
+      existingRegistration.setUserId(registrationDTO.getUserId());
+    }
+
+    Registration updatedRegistration = registrationRepository.save(existingRegistration);
+    return registrationMapper.toDto(updatedRegistration);
+  }
+
+  @Transactional
+  public List<RegistrationDTO> batchSaveRegistrations(List<RegistrationDTO> registrationDTOs) {
+    List<Registration> registrations = registrationDTOs.stream()
+            .map(dto -> {
+              if (registrationRepository.existsByUserIdAndEventId(dto.getUserId(), dto.getEventId())) {
+                throw new ConflictException("User " + dto.getUserId() + " is already registered for event " + dto.getEventId());
+              }
+              Registration registration = registrationMapper.toEntity(dto);
+              registration.setTimestamp(Timestamp.valueOf(LocalDateTime.now()));
+              return registration;
+            })
+            .collect(Collectors.toList());
+
+    List<Registration> savedRegistrations = registrationRepository.saveAll(registrations);
+
+    return savedRegistrations.stream()
             .map(registrationMapper::toDto)
             .collect(Collectors.toList());
   }
