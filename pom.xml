@@ -23,6 +23,7 @@
         <module>PaymentService</module>
         <module>RegistrationService</module>
         <module>ReviewService</module>
+        <module>EurekaServer</module>
     </modules>
 
     <url/>
