@@ -21,7 +21,9 @@ public class User {
 
 
     @Id
-    private UUID uuid = UUID.randomUUID();
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "uuid", updatable = false, nullable = false)
+    private UUID uuid;
 
     @NotNull(message = "First name is required")
     @Size(min = 2, max = 15, message = "First name should be between 2 and 15 characters")

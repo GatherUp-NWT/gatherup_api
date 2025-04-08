@@ -2,6 +2,8 @@ package org.app.reviewservice.controller;
 
 import jakarta.validation.Valid;
 import org.app.reviewservice.dto.ReviewDTO;
+import org.app.reviewservice.dto.ReviewWithEventDTO;
+import org.app.reviewservice.dto.ReviewWithUserDTO;
 import org.app.reviewservice.service.ReviewService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -49,13 +51,15 @@ public class ReviewController {
     }
 
     @GetMapping("/user/{userId}")
-    public List<ReviewDTO> getReviewsByUser(@PathVariable UUID userId) {
-        return reviewService.getReviewsByUser(userId);
+    public List<ReviewWithEventDTO> getReviewsByUser(@PathVariable UUID userId) {
+        return reviewService.getReviewsByUserWithEventDetails(userId);
     }
 
+
+
     @GetMapping("/event/{eventId}")
-    public List<ReviewDTO> getReviewsByEvent(@PathVariable UUID eventId) {
-        return reviewService.getReviewsByEvent(eventId);
+    public List<ReviewWithUserDTO> getReviewsByEvent(@PathVariable UUID eventId) {
+        return reviewService.getReviewsByEventWithUserDetails(eventId);
     }
 
     @GetMapping("/sorted/")
