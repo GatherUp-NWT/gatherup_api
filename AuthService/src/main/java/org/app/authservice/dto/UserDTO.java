@@ -14,7 +14,6 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDTO {
-    private UUID uuid = UUID.randomUUID();
 
     @NotNull(message = "First name is required")
     @Size(min = 2, max = 15, message = "First name should be between 2 and 15 characters")

@@ -35,7 +35,10 @@ public class UserMapperService {
             return destination;
         });
 
-        modelMapper.createTypeMap(UserDTO.class, User.class).addMappings(mapper -> mapper.skip(User::setRole)).setPostConverter(context -> {
+        modelMapper.createTypeMap(UserDTO.class, User.class).addMappings(mapper -> {
+            mapper.skip(User::setRole);
+            mapper.skip(User::setPassword);
+        }).setPostConverter(context -> {
             UserDTO source = context.getSource();
             User destination = context.getDestination();
 
