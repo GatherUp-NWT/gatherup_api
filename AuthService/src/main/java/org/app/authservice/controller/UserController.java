@@ -6,10 +6,11 @@ import org.app.authservice.dto.UserNonSensitiveDTO;
 import org.app.authservice.dto.UserResponseDTO;
 import org.app.authservice.dto.UserUpdateDTO;
 import org.app.authservice.service.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -23,8 +24,16 @@ public class UserController {
 
 
     @GetMapping("/api/v1/users")
-    List<UserNonSensitiveDTO> getAllUsers() {
-        return userService.getAllUsers();
+    public Page<UserNonSensitiveDTO> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "lastName") String sort,
+            @RequestParam(defaultValue = "asc") String direction) {
+
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("desc") ?
+                Sort.Direction.DESC : Sort.Direction.ASC;
+
+        return userService.getAllUsers(page, size, sort, sortDirection);
     }
 
     @PostMapping("/api/v1/users")

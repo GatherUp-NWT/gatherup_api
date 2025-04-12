@@ -1,26 +1,42 @@
 package org.app.eventservice.service;
 
+import org.app.eventservice.appConfig.StatisticsService;
 import org.app.eventservice.dto.*;
 import org.app.eventservice.entity.Event;
 import org.app.eventservice.mappers.EventMapper;
 import org.app.eventservice.repository.EventRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
 public class EventService {
     private final EventMapper eventMapper;
     private final EventRepository eventRepository;
+    private final StatisticsService statisticsService;
 
 
-    public EventService(EventMapper eventMapper, EventRepository eventRepository) {
+    public EventService(EventMapper eventMapper, EventRepository eventRepository, StatisticsService statisticsService) {
         this.eventMapper = eventMapper;
         this.eventRepository = eventRepository;
+        this.statisticsService = statisticsService;
     }
+
     // Get all events
     public EventListResponseDTO getAllEvents() {
-        return eventMapper.toResponseDto(eventRepository.findAll(), true, "Events retrieved successfully");
+        statisticsService.clearStatistics();
+
+        List<Event> events = eventRepository.findAll();
+
+        statisticsService.logStatistics();
+
+        return eventMapper.toResponseDto(events, true, "Events retrieved successfully");
+
     }
 
 
@@ -49,8 +65,6 @@ public class EventService {
         // Validate event data
         if (event.getStartDate().isAfter(event.getEndDate())) {
             throw new IllegalArgumentException("Event start date cannot be after end date");
-        } else if (event.getEndDate().isBefore(event.getStartDate())) {
-            throw new IllegalArgumentException("Event end date cannot be before start date");
         }
 
         Event createdEvent = eventMapper.toEntity(event);
@@ -63,8 +77,6 @@ public class EventService {
     public EventResponseDTO updateEvent(EventUpdateDTO event) {
         if (event.getStartDate().isAfter(event.getEndDate())) {
             throw new IllegalArgumentException("Event start date cannot be after end date");
-        } else if (event.getEndDate().isBefore(event.getStartDate())) {
-            throw new IllegalArgumentException("Event end date cannot be before start date");
         }
 
         Event existingEvent = eventRepository.findById(event.getUuid())
@@ -84,5 +96,29 @@ public class EventService {
     }
 
 
+    public EventListPagedDTO getAllEventsPaginated(int page, int size, String sortBy, String sortOrder) {
 
+        Sort sort = sortOrder.equalsIgnoreCase("asc") ?
+                Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+        Page<Event> pageEvents = eventRepository.findAll(pageable);
+
+        List<Event> events = pageEvents.getContent();
+
+        return eventMapper.toPagedResponseDto(
+                events,
+                pageEvents.getTotalElements(),
+                pageEvents.getTotalPages(),
+                pageEvents.getNumber(),
+                pageEvents.getSize(),
+                true,
+                "Events retrieved successfully"
+        );
+    }
+
+    public EventListResponseDTO getNearbyEvents(double latitude, double longitude, double radius, int limit) {
+        List<Event> events = eventRepository.findNearbyEvents(latitude, longitude, radius, limit);
+        return eventMapper.toResponseDto(events, true, "Nearby events retrieved successfully");
+    }
 }

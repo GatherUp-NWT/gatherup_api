@@ -9,6 +9,8 @@ import org.app.invitationservice.repository.UserInviteRepository;
 import org.app.invitationservice.request.InvitationRequest;
 import org.app.invitationservice.response.InvitationModel;
 import org.app.invitationservice.service.InvitationService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -43,8 +45,8 @@ public class InvitationController {
   }
 
   @GetMapping("/{userId}")
-  public ResponseEntity<List<Invitation>> getInvitations( @PathVariable Long userId) {
-    return ResponseEntity.ok(invitationService.getAllUserInvitations(userId));
+  public Page<Invitation> getInvitations(@PathVariable Long userId, Pageable pageable) {
+    return invitationService.getAllUserInvitations(userId, pageable);
   }
   @PostMapping("/{userId}/{eventId}/{response}")
   public ResponseEntity<String> answerInvitation(@PathVariable Long userId, @PathVariable Long eventId, @PathVariable String response) {
@@ -52,6 +54,8 @@ public class InvitationController {
     EventInvite eventInvite=eventInviteRepository.findById(eventId).orElseThrow(()->new RuntimeException("Event Invite not found"));
     return ResponseEntity.ok(invitationService.answerInvite(userId, eventId, response));
   }
+
+
 
 
 }

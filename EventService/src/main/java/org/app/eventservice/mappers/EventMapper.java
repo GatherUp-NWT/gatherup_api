@@ -138,6 +138,18 @@ public class EventMapper {
         return responseDTO;
     }
 
+    public EventListPagedDTO toPagedResponseDto(List<Event> events, Long totalElements, Integer totalPages, Integer pageNumber, Integer pageSize, Boolean status, String message) {
+        EventListPagedDTO responseDTO = new EventListPagedDTO();
+        responseDTO.setEvents(events);
+        responseDTO.setTotalElements(totalElements);
+        responseDTO.setTotalPages(totalPages);
+        responseDTO.setPageNumber(pageNumber);
+        responseDTO.setPageSize(pageSize);
+        responseDTO.setStatus(status);
+        responseDTO.setMessage(message);
+        return responseDTO;
+    }
+
     public EventObjectResponseDTO toObjectResponse(Event event, Boolean status, String message) {
         EventObjectResponseDTO responseDTO = new EventObjectResponseDTO();
         responseDTO.setEvent(event);

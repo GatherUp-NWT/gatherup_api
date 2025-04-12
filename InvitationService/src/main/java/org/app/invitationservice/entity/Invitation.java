@@ -43,5 +43,7 @@ public class Invitation {
 
   private InvitationResponseType invitationResponseType;
 
+  private TimeStatus statusInTime;
+
 
 }

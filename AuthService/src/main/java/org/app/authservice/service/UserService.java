@@ -1,16 +1,18 @@
 package org.app.authservice.service;
 
-import jakarta.annotation.PostConstruct;
 import org.app.authservice.dto.UserDTO;
 import org.app.authservice.dto.UserNonSensitiveDTO;
 import org.app.authservice.dto.UserResponseDTO;
 import org.app.authservice.dto.UserUpdateDTO;
 import org.app.authservice.entity.User;
 import org.app.authservice.respository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -26,13 +28,11 @@ public class UserService {
         this.userMapperService = userMapperService;
     }
 
-    @PostConstruct
-    public void init() {
+    public Page<UserNonSensitiveDTO> getAllUsers(int page, int size, String sort, Sort.Direction direction) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sort));
+        Page<User> userPage = userRepository.findAll(pageable);
 
-    }
-
-    public List<UserNonSensitiveDTO> getAllUsers() {
-        return userMapperService.toDtoList(userRepository.findAll());
+        return userPage.map(userMapperService::toDto);
     }
 
     @Transactional

@@ -19,6 +19,25 @@ public class EventController {
         return eventService.getAllEvents();
     }
 
+    // Get all events (sortable and paginated)
+    @GetMapping("/events/all")
+    public EventListPagedDTO getAllEventsPaginated(@RequestParam(defaultValue = "0") int page,
+                                                       @RequestParam(defaultValue = "10") int size,
+                                                       @RequestParam(defaultValue = "startDate") String sortBy,
+                                                      @RequestParam(defaultValue = "asc") String sortOrder) {
+        return eventService.getAllEventsPaginated(page, size, sortBy, sortOrder);
+    }
+
+    // Get all events nearby
+    @GetMapping("/events/nearby")
+    public EventListResponseDTO getNearbyEvents(
+            @RequestParam double latitude,
+            @RequestParam double longitude,
+            @RequestParam(defaultValue = "10.0") double radius,
+            @RequestParam(defaultValue = "20") int limit) {
+        return eventService.getNearbyEvents(latitude, longitude, radius, limit);
+    }
+
     // Get all events by user id
     @GetMapping("/events/user/{userId}")
     public EventListResponseDTO getAllEventsByUserId(@PathVariable String userId) {
