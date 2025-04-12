@@ -19,6 +19,7 @@
         <!-- Add your module names here -->
         <module>AuthService</module>
         <module>EventService</module>
+        <module>ConfigServer</module>
         <module>InvitationService</module>
         <module>PaymentService</module>
         <module>RegistrationService</module>
