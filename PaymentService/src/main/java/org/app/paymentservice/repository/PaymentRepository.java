@@ -14,6 +14,11 @@ import org.springframework.data.repository.query.Param;
 public interface PaymentRepository extends CrudRepository<Ticket, Long> {
 
 
+  @Query("SELECT t.userId FROM Ticket t WHERE t.userId = :id")
+UUID findUserId(@Param("id") UUID id);
+
+
+  List<Ticket> findByUserId(UUID userId);
   Page<Ticket> findByUserId(UUID userId,
                             Pageable pageable);
 

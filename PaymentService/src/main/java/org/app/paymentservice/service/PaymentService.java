@@ -54,6 +54,12 @@ public class PaymentService {
 
   @Transactional
   public PaymentModel crateNewPayment(PaymentDto paymentDto) {
+    UUID userId = paymentRepository.findUserId(paymentDto.getUserId());
+    if (userId == null) {
+      throw new RuntimeException("User not found!");
+    }
+
+
     PaymentModel newTicket=new PaymentModel(paymentDto.getUserId(), paymentDto.getEventId(), LocalDateTime.now(),paymentDto.getPrice());
     paymentRepository.save(paymentMapper.mapToTicket(newTicket));
     return newTicket;
