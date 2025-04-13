@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 public class UserController {
@@ -54,5 +55,19 @@ public class UserController {
     @GetMapping("/api/v1/users/{id}")
     public UserNonSensitiveDTO getUserById(@PathVariable String id) {
         return userService.getUserById(id);
+    }
+
+    @PatchMapping("/api/v1/users/{id}")
+    public ResponseEntity<UserResponseDTO> partialUpdateUser(
+            @PathVariable String id,
+            @RequestBody Map<String, Object> updates) {
+
+        try {
+            UUID.fromString(id);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid user ID format");
+        }
+
+        return ResponseEntity.ok(userService.partialUpdateUser(id, updates));
     }
 }
