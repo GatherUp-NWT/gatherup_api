@@ -1,9 +1,6 @@
 package org.app.eventservice;
 
-import org.app.eventservice.dto.EventDTO;
-import org.app.eventservice.dto.EventListResponseDTO;
-import org.app.eventservice.dto.EventResponseDTO;
-import org.app.eventservice.dto.EventUpdateDTO;
+import org.app.eventservice.dto.*;
 import org.app.eventservice.entity.Event;
 import org.app.eventservice.mappers.EventMapper;
 import org.app.eventservice.repository.EventRepository;
@@ -13,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.*;
 
 
 import static org.mockito.ArgumentMatchers.any;
@@ -308,6 +306,177 @@ class EventServiceApplicationTests {
     assertThrows(IllegalArgumentException.class, () ->
             eventService.deleteEvent("invalid-uuid")
     );
+  }
+
+  @Test
+  void getAllEventsPaginated_WithAscendingSort_ShouldReturnPagedEvents() {
+    // Arrange
+    int page = 0;
+    int size = 10;
+    String sortBy = "name";
+    String sortOrder = "asc";
+
+    List<Event> events = Collections.singletonList(event);
+    Page<Event> pageEvents = new PageImpl<>(events, PageRequest.of(page, size, Sort.by(sortBy).ascending()), 1);
+
+    when(eventRepository.findAll(any(Pageable.class))).thenReturn(pageEvents);
+
+    EventListPagedDTO expectedResponse = new EventListPagedDTO();
+    expectedResponse.setStatus(true);
+    expectedResponse.setMessage("Events retrieved successfully");
+    expectedResponse.setEvents(Collections.emptyList());
+    expectedResponse.setTotalElements(1L);
+    expectedResponse.setTotalPages(1);
+    expectedResponse.setPageNumber(0);
+    expectedResponse.setPageSize(10);
+
+    when(eventMapper.toPagedResponseDto(
+            eq(events),
+            eq(1L),
+            eq(1),
+            eq(0),
+            eq(10),
+            eq(true),
+            eq("Events retrieved successfully")
+    )).thenReturn(expectedResponse);
+
+    // Act
+    EventListPagedDTO result = eventService.getAllEventsPaginated(page, size, sortBy, sortOrder);
+
+    // Assert
+    verify(eventRepository).findAll(any(Pageable.class));
+    verify(eventMapper).toPagedResponseDto(
+            eq(events),
+            eq(1L),
+            eq(1),
+            eq(0),
+            eq(10),
+            eq(true),
+            eq("Events retrieved successfully")
+    );
+
+    assertNotNull(result);
+    assertEquals(1L, result.getTotalElements());
+    assertEquals(1, result.getTotalPages());
+    assertEquals(0, result.getPageNumber());
+    assertEquals(10, result.getPageSize());
+  }
+
+  @Test
+  void getAllEventsPaginated_WithDescendingSort_ShouldReturnPagedEvents() {
+    // Arrange
+    int page = 0;
+    int size = 10;
+    String sortBy = "startDate";
+    String sortOrder = "desc";
+
+    List<Event> events = Collections.singletonList(event);
+    Page<Event> pageEvents = new PageImpl<>(events, PageRequest.of(page, size, Sort.by(sortBy).descending()), 1);
+
+    when(eventRepository.findAll(any(Pageable.class))).thenReturn(pageEvents);
+
+    EventListPagedDTO expectedResponse = new EventListPagedDTO();
+    expectedResponse.setStatus(true);
+    expectedResponse.setMessage("Events retrieved successfully");
+    when(eventMapper.toPagedResponseDto(
+            any(), anyLong(), anyInt(), anyInt(), anyInt(), eq(true), anyString()
+    )).thenReturn(expectedResponse);
+
+    // Act
+    EventListPagedDTO result = eventService.getAllEventsPaginated(page, size, sortBy, sortOrder);
+
+    // Assert
+    verify(eventRepository).findAll(any(Pageable.class));
+    verify(eventMapper).toPagedResponseDto(
+            eq(events),
+            eq(1L),
+            eq(1),
+            eq(0),
+            eq(10),
+            eq(true),
+            eq("Events retrieved successfully")
+    );
+
+    assertNotNull(result);
+  }
+
+  @Test
+  void getAllEventsPaginated_WithEmptyPage_ShouldReturnEmptyList() {
+    // Arrange
+    int page = 0;
+    int size = 10;
+    String sortBy = "name";
+    String sortOrder = "asc";
+
+    List<Event> emptyList = Collections.emptyList();
+    Page<Event> emptyPage = new PageImpl<>(emptyList, PageRequest.of(page, size, Sort.by(sortBy).ascending()), 0);
+
+    when(eventRepository.findAll(any(Pageable.class))).thenReturn(emptyPage);
+
+    EventListPagedDTO expectedResponse = new EventListPagedDTO();
+    expectedResponse.setStatus(true);
+    expectedResponse.setMessage("Events retrieved successfully");
+    expectedResponse.setEvents(Collections.emptyList());
+    expectedResponse.setTotalElements(0L);
+
+    when(eventMapper.toPagedResponseDto(
+            eq(emptyList),
+            eq(0L),
+            eq(0),
+            eq(0),
+            eq(10),
+            eq(true),
+            eq("Events retrieved successfully")
+    )).thenReturn(expectedResponse);
+
+    // Act
+    EventListPagedDTO result = eventService.getAllEventsPaginated(page, size, sortBy, sortOrder);
+
+    // Assert
+    verify(eventRepository).findAll(any(Pageable.class));
+    verify(eventMapper).toPagedResponseDto(
+            eq(emptyList),
+            eq(0L),
+            eq(0),
+            eq(0),
+            eq(10),
+            eq(true),
+            eq("Events retrieved successfully")
+    );
+
+    assertNotNull(result);
+    assertEquals(0L, result.getTotalElements());
+  }
+
+  @Test
+  void getNearbyEvents_ShouldReturnNearbyEvents() {
+    // Arrange
+    double latitude = 40.7128;
+    double longitude = -74.0060;
+    double radius = 5.0;
+    int limit = 10;
+
+    List<Event> events = Collections.singletonList(event);
+    when(eventRepository.findNearbyEvents(latitude, longitude, radius, limit)).thenReturn(events);
+
+    EventListResponseDTO expectedResponse = new EventListResponseDTO();
+    expectedResponse.setEvents(Collections.emptyList());
+    expectedResponse.setStatus(true);
+    expectedResponse.setMessage("Nearby events retrieved successfully");
+
+    when(eventMapper.toResponseDto(eq(events), eq(true), eq("Nearby events retrieved successfully")))
+            .thenReturn(expectedResponse);
+
+    // Act
+    EventListResponseDTO result = eventService.getNearbyEvents(latitude, longitude, radius, limit);
+
+    // Assert
+    verify(eventRepository).findNearbyEvents(latitude, longitude, radius, limit);
+    verify(eventMapper).toResponseDto(eq(events), eq(true), eq("Nearby events retrieved successfully"));
+
+    assertNotNull(result);
+    assertEquals("Nearby events retrieved successfully", result.getMessage());
+    assertTrue(result.getStatus());
   }
 
 

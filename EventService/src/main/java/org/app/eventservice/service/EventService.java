@@ -18,23 +18,16 @@ import java.util.UUID;
 public class EventService {
     private final EventMapper eventMapper;
     private final EventRepository eventRepository;
-    private final StatisticsService statisticsService;
 
 
-    public EventService(EventMapper eventMapper, EventRepository eventRepository, StatisticsService statisticsService) {
+    public EventService(EventMapper eventMapper, EventRepository eventRepository) {
         this.eventMapper = eventMapper;
         this.eventRepository = eventRepository;
-        this.statisticsService = statisticsService;
     }
 
     // Get all events
     public EventListResponseDTO getAllEvents() {
-        statisticsService.clearStatistics();
-
         List<Event> events = eventRepository.findAll();
-
-        statisticsService.logStatistics();
-
         return eventMapper.toResponseDto(events, true, "Events retrieved successfully");
 
     }

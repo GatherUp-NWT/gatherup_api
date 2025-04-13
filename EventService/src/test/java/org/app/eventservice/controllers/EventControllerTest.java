@@ -252,4 +252,130 @@ public class EventControllerTest {
 
         verify(eventService).deleteEvent(invalidEventId);
     }
+
+    @Test
+    void getAllEventsPaginated_ShouldReturnPagedEvents() throws Exception {
+        // Arrange
+        int page = 0;
+        int size = 10;
+        String sortBy = "startDate";
+        String sortOrder = "asc";
+
+        EventListPagedDTO pagedResponse = new EventListPagedDTO();
+        pagedResponse.setEvents(new ArrayList<>());
+        pagedResponse.setStatus(true);
+        pagedResponse.setMessage("Success");
+        pagedResponse.setPageNumber(page);
+        pagedResponse.setPageSize(size);
+        pagedResponse.setTotalPages(1);
+        pagedResponse.setTotalElements(0L);
+
+        when(eventService.getAllEventsPaginated(page, size, sortBy, sortOrder))
+                .thenReturn(pagedResponse);
+
+        // Act & Assert
+        mockMvc.perform(get("/events/all")
+                        .param("page", String.valueOf(page))
+                        .param("size", String.valueOf(size))
+                        .param("sortBy", sortBy)
+                        .param("sortOrder", sortOrder))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(true))
+                .andExpect(jsonPath("$.message").value("Success"))
+                .andExpect(jsonPath("$.events").isArray())
+                .andExpect(jsonPath("$.pageNumber").value(page))
+                .andExpect(jsonPath("$.pageSize").value(size))
+                .andExpect(jsonPath("$.totalPages").value(1))
+                .andExpect(jsonPath("$.totalElements").value(0));
+
+        verify(eventService).getAllEventsPaginated(page, size, sortBy, sortOrder);
+    }
+
+    @Test
+    void getAllEventsPaginated_WithCustomParams_ShouldReturnPagedEvents() throws Exception {
+        // Arrange
+        int page = 1;
+        int size = 5;
+        String sortBy = "name";
+        String sortOrder = "desc";
+
+        EventListPagedDTO pagedResponse = new EventListPagedDTO();
+        pagedResponse.setEvents(new ArrayList<>());
+        pagedResponse.setStatus(true);
+        pagedResponse.setMessage("Success");
+        pagedResponse.setPageNumber(page);
+        pagedResponse.setPageSize(size);
+        pagedResponse.setTotalPages(2);
+        pagedResponse.setTotalElements(10L);
+
+        when(eventService.getAllEventsPaginated(page, size, sortBy, sortOrder))
+                .thenReturn(pagedResponse);
+
+        // Act & Assert
+        mockMvc.perform(get("/events/all")
+                        .param("page", String.valueOf(page))
+                        .param("size", String.valueOf(size))
+                        .param("sortBy", sortBy)
+                        .param("sortOrder", sortOrder))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(true))
+                .andExpect(jsonPath("$.message").value("Success"))
+                .andExpect(jsonPath("$.pageNumber").value(page))
+                .andExpect(jsonPath("$.pageSize").value(size))
+                .andExpect(jsonPath("$.totalPages").value(2))
+                .andExpect(jsonPath("$.totalElements").value(10));
+
+        verify(eventService).getAllEventsPaginated(page, size, sortBy, sortOrder);
+    }
+
+    @Test
+    void getNearbyEvents_ShouldReturnNearbyEvents() throws Exception {
+        // Arrange
+        double latitude = 40.7128;
+        double longitude = -74.0060;
+        double radius = 5.0;
+        int limit = 10;
+
+        when(eventService.getNearbyEvents(latitude, longitude, radius, limit))
+                .thenReturn(eventListResponseDTO);
+
+        // Act & Assert
+        mockMvc.perform(get("/events/nearby")
+                        .param("latitude", String.valueOf(latitude))
+                        .param("longitude", String.valueOf(longitude))
+                        .param("radius", String.valueOf(radius))
+                        .param("limit", String.valueOf(limit)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(true))
+                .andExpect(jsonPath("$.message").value("Success"))
+                .andExpect(jsonPath("$.events").isArray());
+
+        verify(eventService).getNearbyEvents(latitude, longitude, radius, limit);
+    }
+
+    @Test
+    void getNearbyEvents_WithDefaultParams_ShouldReturnNearbyEvents() throws Exception {
+        // Arrange
+        double latitude = 40.7128;
+        double longitude = -74.0060;
+        double defaultRadius = 10.0;
+        int defaultLimit = 20;
+
+        when(eventService.getNearbyEvents(latitude, longitude, defaultRadius, defaultLimit))
+                .thenReturn(eventListResponseDTO);
+
+        // Act & Assert
+        mockMvc.perform(get("/events/nearby")
+                        .param("latitude", String.valueOf(latitude))
+                        .param("longitude", String.valueOf(longitude)))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.status").value(true))
+                .andExpect(jsonPath("$.message").value("Success"));
+
+        verify(eventService).getNearbyEvents(latitude, longitude, defaultRadius, defaultLimit);
+    }
 }
