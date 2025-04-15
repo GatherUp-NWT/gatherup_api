@@ -17,4 +17,7 @@ public class UserDTO {
   private String email;
   private String bio;
   private String role;
+
+  public UserDTO(UUID senderId, String alice, String mail) {
+  }
 }
