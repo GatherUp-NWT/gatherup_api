@@ -20,13 +20,14 @@ import org.app.paymentservice.response.EventSold;
 import org.app.paymentservice.response.PaymentModel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 @Slf4j
 @Validated
 @Service
-
+@Component
 public class PaymentService {
 
   private final PaymentRepository paymentRepository;
