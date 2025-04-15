@@ -25,6 +25,7 @@
         <module>RegistrationService</module>
         <module>ReviewService</module>
         <module>EurekaServer</module>
+        <module>SystemEventsService</module>
     </modules>
 
     <url/>
