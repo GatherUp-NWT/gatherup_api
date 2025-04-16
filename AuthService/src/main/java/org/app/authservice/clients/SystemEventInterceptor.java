@@ -1,12 +1,15 @@
-package org.app.eventservice.clients;
+package org.app.authservice.clients;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.app.systemevent.proto.LogEventRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
@@ -19,10 +22,9 @@ import java.util.regex.Pattern;
 @Slf4j
 @RequiredArgsConstructor
 public class SystemEventInterceptor implements HandlerInterceptor {
-    private static final Pattern RESOURCE_ID_PATTERN = Pattern.compile("/events/([^/]+)(?:/|$)");
+    private static final Pattern RESOURCE_ID_PATTERN = Pattern.compile("/api/v1/users([^/]+)(?:/|$)");
 
     private final SystemEventClient systemEventClient;
-    private final ObjectMapper objectMapper;
     private final ThreadLocal<Long> startTime = new ThreadLocal<>();
 
     @Override
@@ -37,20 +39,27 @@ public class SystemEventInterceptor implements HandlerInterceptor {
         try {
             long duration = System.currentTimeMillis() - startTime.get();
 
-            ContentCachingRequestWrapper requestWrapper = (ContentCachingRequestWrapper) request;
-            ContentCachingResponseWrapper responseWrapper = (ContentCachingResponseWrapper) response;
+            ContentCachingRequestWrapper requestWrapper = getContentCachingRequestWrapper(request);
+            ContentCachingResponseWrapper responseWrapper = getContentCachingResponseWrapper(response);
 
-            String requestBody = new String(requestWrapper.getContentAsByteArray());
-            String responseBody = new String(responseWrapper.getContentAsByteArray());
-            responseWrapper.copyBodyToResponse();
+            String requestBody = "";
+            String responseBody = "";
+
+            if (requestWrapper != null) {
+                requestBody = new String(requestWrapper.getContentAsByteArray());
+            }
+
+            if (responseWrapper != null) {
+                responseBody = new String(responseWrapper.getContentAsByteArray());
+                responseWrapper.copyBodyToResponse();
+            }
 
             String endpoint = request.getRequestURI();
             String resourceId = extractResourceId(endpoint);
-
             String userId = request.getHeader("X-User-ID");
 
             LogEventRequest eventRequest = LogEventRequest.newBuilder()
-                    .setServiceName("EventService")
+                    .setServiceName("UserService")
                     .setEndpoint(endpoint)
                     .setHttpMethod(request.getMethod())
                     .setResourceId(resourceId)
@@ -83,5 +92,33 @@ public class SystemEventInterceptor implements HandlerInterceptor {
             }
         }
         return "unknown";
+    }
+    private ContentCachingRequestWrapper getContentCachingRequestWrapper(HttpServletRequest request) {
+        HttpServletRequest currentRequest = request;
+        while (currentRequest != null) {
+            if (currentRequest instanceof ContentCachingRequestWrapper) {
+                return (ContentCachingRequestWrapper) currentRequest;
+            } else if (currentRequest instanceof HttpServletRequestWrapper) {
+                currentRequest = (HttpServletRequest) ((HttpServletRequestWrapper) currentRequest).getRequest();
+            } else {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private ContentCachingResponseWrapper getContentCachingResponseWrapper(HttpServletResponse response) {
+        HttpServletRequest request =
+                (HttpServletRequest) RequestContextHolder.getRequestAttributes().resolveReference(RequestAttributes.REFERENCE_REQUEST);
+        if (request != null) {
+            Object stored = request.getAttribute("CACHED_RESPONSE_WRAPPER");
+            if (stored instanceof ContentCachingResponseWrapper) {
+                return (ContentCachingResponseWrapper) stored;
+            }
+        }
+        if (response instanceof ContentCachingResponseWrapper) {
+            return (ContentCachingResponseWrapper) response;
+        }
+        return null;
     }
 }

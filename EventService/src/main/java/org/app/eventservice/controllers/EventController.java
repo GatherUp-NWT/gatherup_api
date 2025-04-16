@@ -62,20 +62,20 @@ public class EventController {
     // Get all events by status
 
     // Create event
-    @PostMapping("/events/create")
+    @PostMapping("/events")
     public EventResponseDTO createEvent(@Valid @RequestBody EventDTO event) {
         return eventService.createEvent(event);
     }
 
     // Update event
 
-    @PutMapping("/events/update")
+    @PutMapping("/events")
     public EventResponseDTO updateEvent(@Valid @RequestBody EventUpdateDTO event) {
         return eventService.updateEvent(event);
     }
 
     // Delete event
-    @DeleteMapping("/events/delete/{eventId}")
+    @DeleteMapping("/events/{eventId}")
     public EventResponseDTO deleteEvent(@PathVariable String eventId) {
         return eventService.deleteEvent(eventId);
     }

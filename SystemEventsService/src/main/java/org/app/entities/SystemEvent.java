@@ -4,15 +4,14 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Entity
 @Data
 @Table(name = "system_events")
 public class SystemEvent {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     private String serviceName;
     private String endpoint;
