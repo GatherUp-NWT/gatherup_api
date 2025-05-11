@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping("/api/v1/invitations")
+@RequestMapping("invitations")
 public class InvitationController {
 
   private final InvitationService invitationService;

@@ -26,6 +26,7 @@
         <module>ReviewService</module>
         <module>EurekaServer</module>
         <module>SystemEventsService</module>
+        <module>ApiGateway</module>
     </modules>
 
     <url/>
