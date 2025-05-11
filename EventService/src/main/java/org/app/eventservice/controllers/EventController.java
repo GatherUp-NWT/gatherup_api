@@ -3,6 +3,7 @@ package org.app.eventservice.controllers;
 import jakarta.validation.Valid;
 import org.app.eventservice.dto.*;
 import org.app.eventservice.service.EventService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,6 +14,9 @@ public class EventController {
     public EventController(EventService eventService) {
         this.eventService = eventService;
     }
+
+    @Value("${server.port}")
+    private String port;
 
     // Get all events - mainly for admin
     @GetMapping
@@ -54,6 +58,7 @@ public class EventController {
     // Get event by event id
     @GetMapping("/{eventId}")
     public EventObjectResponseDTO getEventById(@PathVariable String eventId) {
+        System.out.println("PORT: " + port + ".");
         return eventService.getEventById(eventId);
     }
 
