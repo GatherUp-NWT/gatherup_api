@@ -1,6 +1,5 @@
 package org.app.reviewservice.clients;
 
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -28,28 +27,37 @@ public class SystemEventInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+        // Wrap the request with ContentCachingRequestWrapper if it's not already wrapped
+        if (!(request instanceof ContentCachingRequestWrapper)) {
+            request = new ContentCachingRequestWrapper(request);
+        }
+        // Start timing the request
         startTime.set(System.currentTimeMillis());
         return true;
     }
-
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
         try {
             long duration = System.currentTimeMillis() - startTime.get();
 
+            // Cast request and response to their respective wrappers
             ContentCachingRequestWrapper requestWrapper = (ContentCachingRequestWrapper) request;
             ContentCachingResponseWrapper responseWrapper = (ContentCachingResponseWrapper) response;
 
+            // Get request and response bodies
             String requestBody = new String(requestWrapper.getContentAsByteArray());
             String responseBody = new String(responseWrapper.getContentAsByteArray());
             responseWrapper.copyBodyToResponse();
 
+            // Get endpoint and extract resource ID
             String endpoint = request.getRequestURI();
             String resourceId = extractResourceId(endpoint);
 
+            // Get user ID from header
             String userId = request.getHeader("X-User-ID");
 
+            // Create the LogEventRequest and log the event
             LogEventRequest eventRequest = LogEventRequest.newBuilder()
                     .setServiceName("EventService")
                     .setEndpoint(endpoint)
@@ -63,6 +71,7 @@ public class SystemEventInterceptor implements HandlerInterceptor {
                     .setDurationMs(duration)
                     .build();
 
+            // Log the event using the systemEventClient
             systemEventClient.logEvent(eventRequest);
 
         } catch (Exception e) {
@@ -72,15 +81,16 @@ public class SystemEventInterceptor implements HandlerInterceptor {
         }
     }
 
+    // Method to extract the resource ID from the endpoint URI
     private String extractResourceId(String endpoint) {
         Matcher matcher = RESOURCE_ID_PATTERN.matcher(endpoint);
         if (matcher.find()) {
             String potentialId = matcher.group(1);
             try {
-                UUID.fromString(potentialId);
+                UUID.fromString(potentialId);  // Check if it's a valid UUID
                 return potentialId;
             } catch (IllegalArgumentException e) {
-                return potentialId;
+                return potentialId;  // Return it as a string if it's not a UUID
             }
         }
         return null;

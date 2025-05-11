@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
+@RequestMapping("users")
 public class UserController {
 
     private final UserService userService;
@@ -24,7 +25,7 @@ public class UserController {
     }
 
 
-    @GetMapping("/api/v1/users")
+    @GetMapping
     public Page<UserNonSensitiveDTO> getAllUsers(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
@@ -37,27 +38,27 @@ public class UserController {
         return userService.getAllUsers(page, size, sort, sortDirection);
     }
 
-    @PostMapping("/api/v1/users")
+    @PostMapping
     public UserResponseDTO createUser(@Valid @RequestBody UserDTO userDTO) {
         return userService.createUser(userDTO);
     }
 
-    @DeleteMapping("/api/v1/users/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteUser(@PathVariable String id) {
         return ResponseEntity.ok(userService.deleteUser(id));
     }
 
-    @PutMapping("/api/v1/users/{id}")
+    @PutMapping("/{id}")
     public UserResponseDTO updateUser(@PathVariable String id, @Valid @RequestBody UserUpdateDTO userDTO) {
         return userService.updateUser(id, userDTO);
     }
 
-    @GetMapping("/api/v1/users/{id}")
+    @GetMapping("/{id}")
     public UserNonSensitiveDTO getUserById(@PathVariable String id) {
         return userService.getUserById(id);
     }
 
-    @PatchMapping("/api/v1/users/{id}")
+    @PatchMapping("/{id}")
     public ResponseEntity<UserResponseDTO> partialUpdateUser(
             @PathVariable String id,
             @RequestBody Map<String, Object> updates) {

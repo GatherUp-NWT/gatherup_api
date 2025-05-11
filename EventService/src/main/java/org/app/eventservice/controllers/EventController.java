@@ -6,6 +6,7 @@ import org.app.eventservice.service.EventService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping("events")
 public class EventController {
     private final EventService eventService;
 
@@ -14,13 +15,13 @@ public class EventController {
     }
 
     // Get all events - mainly for admin
-    @GetMapping("/events")
+    @GetMapping
     public EventListResponseDTO getAllEvents() {
         return eventService.getAllEvents();
     }
 
     // Get all events (sortable and paginated)
-    @GetMapping("/events/all")
+    @GetMapping("/all")
     public EventListPagedDTO getAllEventsPaginated(@RequestParam(defaultValue = "0") int page,
                                                        @RequestParam(defaultValue = "10") int size,
                                                        @RequestParam(defaultValue = "startDate") String sortBy,
@@ -29,7 +30,7 @@ public class EventController {
     }
 
     // Get all events nearby
-    @GetMapping("/events/nearby")
+    @GetMapping("/nearby")
     public EventListResponseDTO getNearbyEvents(
             @RequestParam double latitude,
             @RequestParam double longitude,
@@ -39,19 +40,19 @@ public class EventController {
     }
 
     // Get all events by user id
-    @GetMapping("/events/user/{userId}")
+    @GetMapping("/user/{userId}")
     public EventListResponseDTO getAllEventsByUserId(@PathVariable String userId) {
         return eventService.getAllEventsByUserId(userId);
     }
 
     // Get all events by category name
-    @GetMapping("/events/category/{categoryName}")
+    @GetMapping("/category/{categoryName}")
     public EventListResponseDTO getAllEventsByCategoryName(@PathVariable String categoryName) {
         return eventService.getAllEventsByCategoryName(categoryName);
     }
 
     // Get event by event id
-    @GetMapping("/events/{eventId}")
+    @GetMapping("/{eventId}")
     public EventObjectResponseDTO getEventById(@PathVariable String eventId) {
         return eventService.getEventById(eventId);
     }
@@ -62,24 +63,21 @@ public class EventController {
     // Get all events by status
 
     // Create event
-    @PostMapping("/events")
+    @PostMapping
     public EventResponseDTO createEvent(@Valid @RequestBody EventDTO event) {
         return eventService.createEvent(event);
     }
 
     // Update event
 
-    @PutMapping("/events")
+    @PutMapping
     public EventResponseDTO updateEvent(@Valid @RequestBody EventUpdateDTO event) {
         return eventService.updateEvent(event);
     }
 
     // Delete event
-    @DeleteMapping("/events/{eventId}")
+    @DeleteMapping("/{eventId}")
     public EventResponseDTO deleteEvent(@PathVariable String eventId) {
         return eventService.deleteEvent(eventId);
     }
-
-
-
 }
