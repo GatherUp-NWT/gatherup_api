@@ -6,6 +6,9 @@ import org.app.eventservice.service.EventService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+
 @RestController
 @RequestMapping("events")
 public class EventController {
@@ -58,7 +61,10 @@ public class EventController {
     // Get event by event id
     @GetMapping("/{eventId}")
     public EventObjectResponseDTO getEventById(@PathVariable String eventId) {
-        System.out.println("PORT: " + port + ".");
+        String formattedTime = LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss.SSS"));
+
+        System.out.println("PORT: " + port + " | Time: " + formattedTime);
+
         return eventService.getEventById(eventId);
     }
 
