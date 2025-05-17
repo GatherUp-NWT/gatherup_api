@@ -13,4 +13,6 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
     List<Registration> findByUserId(UUID userId);
     List<Registration> findByEventId(UUID eventId);
     boolean existsByUserIdAndEventId(@NotNull(message = "User ID cannot be null") UUID userId, @NotNull(message = "Event ID cannot be null") UUID eventId);
+
+    void deleteByEventId(UUID eventId);
 }

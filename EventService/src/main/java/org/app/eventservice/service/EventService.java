@@ -1,6 +1,7 @@
 package org.app.eventservice.service;
 
-import org.app.eventservice.appConfig.StatisticsService;
+import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.app.eventservice.dto.*;
 import org.app.eventservice.entity.Event;
 import org.app.eventservice.mappers.EventMapper;
@@ -15,14 +16,17 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
+@Slf4j
 public class EventService {
     private final EventMapper eventMapper;
     private final EventRepository eventRepository;
+    private final EventDeletionPublisher eventDeletionPublisher;
 
 
-    public EventService(EventMapper eventMapper, EventRepository eventRepository) {
+    public EventService(EventMapper eventMapper, EventRepository eventRepository, EventDeletionPublisher eventDeletionPublisher) {
         this.eventMapper = eventMapper;
         this.eventRepository = eventRepository;
+        this.eventDeletionPublisher = eventDeletionPublisher;
     }
 
     // Get all events
@@ -81,6 +85,7 @@ public class EventService {
         return eventMapper.toResponseDto(savedEvent, true, "Event updated successfully");
     }
 
+    @Transactional
     public EventResponseDTO deleteEvent(String eventId) {
         UUID eventUUID = UUID.fromString(eventId);
         Event event = eventRepository.findById(eventUUID).orElseThrow(() -> new IllegalArgumentException("Event not found"));
@@ -114,4 +119,32 @@ public class EventService {
         List<Event> events = eventRepository.findNearbyEvents(latitude, longitude, radius, limit);
         return eventMapper.toResponseDto(events, true, "Nearby events retrieved successfully");
     }
+
+    public String requestEventDeletion(String eventId) {
+        UUID eventUUID = UUID.fromString(eventId);
+        log.info("Initiating deletion process for eventId: {}", eventId);
+
+        String correlationId = eventDeletionPublisher.publishEventDeletion(eventUUID);
+
+        log.info("Event deletion request published for eventId: {}. Waiting for registration deletion confirmation.", eventId);
+
+        return correlationId;
+    }
+
+    @Transactional
+    public void finalizeEventDeletion(UUID eventId) {
+        log.info("Finalizing deletion of event: {}", eventId);
+        try {
+            //throw new RuntimeException("Simulated error during event deletion");
+            eventRepository.deleteById(eventId); // Actual deletion from the database
+            log.info("Event {} successfully deleted from database.", eventId);
+        } catch (Exception e) {
+            log.error("Failed to finalize event deletion for eventId: {}. This might require manual intervention.", eventId, e);
+            throw new RuntimeException("Failed to finalize event deletion", e);
+        }
+    }
+
+
+
+
 }

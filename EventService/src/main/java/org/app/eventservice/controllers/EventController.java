@@ -1,21 +1,33 @@
 package org.app.eventservice.controllers;
 
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.app.eventservice.dto.*;
+import org.app.eventservice.entity.DeletionStatus;
+import org.app.eventservice.service.DeletionStatusService;
 import org.app.eventservice.service.EventService;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.time.LocalDateTime;
+import java.util.UUID;
 
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 
 @RestController
 @RequestMapping("events")
+@Slf4j
 public class EventController {
     private final EventService eventService;
+    private final DeletionStatusService deletionStatusService;
 
-    public EventController(EventService eventService) {
+    public EventController(EventService eventService, DeletionStatusService deletionStatusService) {
         this.eventService = eventService;
+        this.deletionStatusService = deletionStatusService;
     }
 
     @Value("${server.port}")
@@ -88,7 +100,66 @@ public class EventController {
 
     // Delete event
     @DeleteMapping("/{eventId}")
-    public EventResponseDTO deleteEvent(@PathVariable String eventId) {
-        return eventService.deleteEvent(eventId);
+    public ResponseEntity<DeletionRequestResponseDTO> deleteEvent(@PathVariable String eventId) {
+        try {
+            String correlationId = eventService.requestEventDeletion(eventId);
+            UUID eventUUID = UUID.fromString(eventId);
+            log.info("Event deletion requested for eventId: {} with correlationId: {}", eventId, correlationId);
+            deletionStatusService.initializeDeletion(correlationId, eventUUID);
+
+            DeletionRequestResponseDTO response = DeletionRequestResponseDTO.builder()
+                    .status("PENDING")
+                    .correlationId(correlationId)
+                    .timestamp(LocalDateTime.now())
+                    .message("Event deletion process initiated")
+                    .statusEndpoint("/events/deletion-status/" + correlationId)
+                    .build();
+
+            return ResponseEntity.accepted().body(response);
+        } catch (Exception e) {
+            log.error("Failed to initiate event deletion: {}", e.getMessage());
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR,
+                    "Failed to initiate event deletion: " + e.getMessage()
+            );
+        }
     }
+
+    @GetMapping("/deletion-status/{correlationId}")
+    public ResponseEntity<EventDeletionStatusDTO> getDeletionStatus(
+            @PathVariable String correlationId) {
+
+        DeletionStatus status =
+                deletionStatusService.getStatus(correlationId);
+
+        if (status == null) {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND,
+                    "Deletion status not found for correlationId: " + correlationId
+            );
+        }
+
+        EventDeletionStatusDTO.ErrorDetails errorDetails = null;
+        if (status.getErrorCode() != null) {
+            errorDetails = EventDeletionStatusDTO.ErrorDetails.builder()
+                    .code(status.getErrorCode())
+                    .message(status.getErrorMessage())
+                    .build();
+        }
+
+        EventDeletionStatusDTO response = EventDeletionStatusDTO.builder()
+                .status(status.getStatus())
+                .correlationId(correlationId)
+                .timestamp(status.getTimestamp())
+                .message(status.getMessage())
+                .error(errorDetails)
+                .build();
+
+        return status.getStatus().equals("PENDING")
+                ? ResponseEntity.accepted().body(response)
+                : ResponseEntity.ok(response);
+    }
+
+
+
 }
