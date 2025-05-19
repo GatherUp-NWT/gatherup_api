@@ -66,5 +66,30 @@ public class GlobalExceptionHandler {
 
     }
 
+    @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponse> handleConstraintViolationException(
+            jakarta.validation.ConstraintViolationException ex, HttpServletRequest request) {
+
+        StringBuilder messageBuilder = new StringBuilder();
+
+        ex.getConstraintViolations().forEach(violation -> {
+            if (!messageBuilder.isEmpty()) {
+                messageBuilder.append(", ");
+            }
+            messageBuilder.append(violation.getMessage());
+        });
+
+        String message = messageBuilder.toString();
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                message,
+                request.getRequestURI()
+        );
+
+        return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
+    }
+
     // Add more exception handlers as needed
 }

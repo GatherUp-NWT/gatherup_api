@@ -2,11 +2,14 @@ package org.app.eventservice.clients;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.app.systemevent.proto.LogEventRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.web.context.request.RequestAttributes;
+import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.util.ContentCachingRequestWrapper;
 import org.springframework.web.util.ContentCachingResponseWrapper;
@@ -37,16 +40,24 @@ public class SystemEventInterceptor implements HandlerInterceptor {
         try {
             long duration = System.currentTimeMillis() - startTime.get();
 
-            ContentCachingRequestWrapper requestWrapper = (ContentCachingRequestWrapper) request;
-            ContentCachingResponseWrapper responseWrapper = (ContentCachingResponseWrapper) response;
+            // Using the safe extraction methods to get wrappers
+            ContentCachingRequestWrapper requestWrapper = getContentCachingRequestWrapper(request);
+            ContentCachingResponseWrapper responseWrapper = getContentCachingResponseWrapper(response);
 
-            String requestBody = new String(requestWrapper.getContentAsByteArray());
-            String responseBody = new String(responseWrapper.getContentAsByteArray());
-            responseWrapper.copyBodyToResponse();
+            String requestBody = "";
+            String responseBody = "";
+
+            if (requestWrapper != null) {
+                requestBody = new String(requestWrapper.getContentAsByteArray());
+            }
+
+            if (responseWrapper != null) {
+                responseBody = new String(responseWrapper.getContentAsByteArray());
+                responseWrapper.copyBodyToResponse();
+            }
 
             String endpoint = request.getRequestURI();
             String resourceId = extractResourceId(endpoint);
-
             String userId = request.getHeader("X-User-ID");
 
             LogEventRequest eventRequest = LogEventRequest.newBuilder()
@@ -63,13 +74,45 @@ public class SystemEventInterceptor implements HandlerInterceptor {
                     .build();
 
             systemEventClient.logEvent(eventRequest);
-
         } catch (Exception e) {
             log.error("Error logging system event", e);
         } finally {
             startTime.remove();
         }
     }
+
+    private ContentCachingRequestWrapper getContentCachingRequestWrapper(HttpServletRequest request) {
+        HttpServletRequest currentRequest = request;
+        while (currentRequest != null) {
+            if (currentRequest instanceof ContentCachingRequestWrapper) {
+                return (ContentCachingRequestWrapper) currentRequest;
+            } else if (currentRequest instanceof HttpServletRequestWrapper) {
+                currentRequest = (HttpServletRequest) ((HttpServletRequestWrapper) currentRequest).getRequest();
+            } else {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    private ContentCachingResponseWrapper getContentCachingResponseWrapper(HttpServletResponse response) {
+        if (response instanceof ContentCachingResponseWrapper) {
+            return (ContentCachingResponseWrapper) response;
+        }
+
+        // Alternatively, you can try to get it from request attributes if you store it there
+        HttpServletRequest request =
+                (HttpServletRequest) RequestContextHolder.getRequestAttributes().resolveReference(RequestAttributes.REFERENCE_REQUEST);
+        if (request != null) {
+            Object stored = request.getAttribute("CACHED_RESPONSE_WRAPPER");
+            if (stored instanceof ContentCachingResponseWrapper) {
+                return (ContentCachingResponseWrapper) stored;
+            }
+        }
+
+        return null;
+    }
+
 
     private String extractResourceId(String endpoint) {
         Matcher matcher = RESOURCE_ID_PATTERN.matcher(endpoint);

@@ -50,21 +50,7 @@ public class EventMapper {
                 category = eventCategoryRepository.findByName("General");
             }
             destination.setEventCategory(category);
-/*
-            if (source.getEventBanner() != null && !source.getEventBanner().isEmpty()) {
-                try {
-                    // Clean up the Base64 string before decoding
-                    String cleanBase64 = source.getEventBanner().trim();
-                    // Handle potential padding issues with Base64
-                    if (cleanBase64.contains(",")) {
-                        cleanBase64 = cleanBase64.split(",")[1];
-                    }
-                    destination.setEventBanner(Base64.getDecoder().decode(cleanBase64));
-                } catch (IllegalArgumentException e) {
-                    throw new RuntimeException("Invalid Base64 string for event banner", e);
-                }
-            }
-*/
+
             if (source.getAgendas() != null) {
                 if (destination.getAgendas() == null) {
                     destination.setAgendas(new HashSet<>());

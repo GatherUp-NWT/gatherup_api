@@ -67,10 +67,8 @@ public class Event {
     @OneToMany(mappedBy = "event", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private Set<Agenda> agendas = new HashSet<>();
-/*
-    @Lob
-    @Column(name = "event_banner", columnDefinition = "BYTEA")
-    private byte[] eventBanner;*/
+
+    private String eventBannerUrl;
 
 
     public void addAgenda(Agenda agenda) {

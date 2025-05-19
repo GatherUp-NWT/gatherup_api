@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
@@ -21,12 +22,14 @@ public class EventService {
     private final EventMapper eventMapper;
     private final EventRepository eventRepository;
     private final EventDeletionPublisher eventDeletionPublisher;
+    private final SupabaseStorageService supabaseStorageService;
 
 
-    public EventService(EventMapper eventMapper, EventRepository eventRepository, EventDeletionPublisher eventDeletionPublisher) {
+    public EventService(EventMapper eventMapper, EventRepository eventRepository, EventDeletionPublisher eventDeletionPublisher, SupabaseStorageService supabaseStorageService) {
         this.eventMapper = eventMapper;
         this.eventRepository = eventRepository;
         this.eventDeletionPublisher = eventDeletionPublisher;
+        this.supabaseStorageService = supabaseStorageService;
     }
 
     // Get all events
@@ -68,6 +71,21 @@ public class EventService {
         Event savedEvent = eventRepository.save(createdEvent);
 
         return eventMapper.toResponseDto(savedEvent, true, "Event created successfully");
+
+    }
+
+    @Transactional
+    public EventResponseDTO createEventWithImage(EventDTO eventDTO, MultipartFile image) {
+        Event event = eventMapper.toEntity(eventDTO);
+        event = eventRepository.save(event);
+
+        if (image != null && !image.isEmpty()) {
+            String imageUrl = supabaseStorageService.uploadImage(image, event.getUuid());
+            event.setEventBannerUrl(imageUrl);
+            event = eventRepository.save(event);
+        }
+
+        return eventMapper.toResponseDto(event, true, "Event created successfully");
 
     }
 

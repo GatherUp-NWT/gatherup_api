@@ -1,5 +1,6 @@
 package org.app.eventservice.controllers;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.app.eventservice.dto.*;
@@ -8,10 +9,13 @@ import org.app.eventservice.service.DeletionStatusService;
 import org.app.eventservice.service.EventService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -24,10 +28,12 @@ import java.time.format.DateTimeFormatter;
 public class EventController {
     private final EventService eventService;
     private final DeletionStatusService deletionStatusService;
+    private final ObjectMapper objectMapper;
 
-    public EventController(EventService eventService, DeletionStatusService deletionStatusService) {
+    public EventController(EventService eventService, DeletionStatusService deletionStatusService, ObjectMapper objectMapper) {
         this.eventService = eventService;
         this.deletionStatusService = deletionStatusService;
+        this.objectMapper = objectMapper;
     }
 
     @Value("${server.port}")
@@ -159,6 +165,24 @@ public class EventController {
                 ? ResponseEntity.accepted().body(response)
                 : ResponseEntity.ok(response);
     }
+
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public EventResponseDTO createEventWithImage(
+            @RequestPart("eventData") String eventDataJson,
+            @RequestPart(value = "image", required = false) MultipartFile image
+    ) {
+        try {
+            EventDTO eventDTO = objectMapper.readValue(eventDataJson, EventDTO.class);
+            return eventService.createEventWithImage(eventDTO, image);
+        } catch (IOException e) {
+            log.error("Error parsing event data: {}", e.getMessage());
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid event data format: " + e.getMessage()
+            );
+        }
+    }
+
 
 
 
