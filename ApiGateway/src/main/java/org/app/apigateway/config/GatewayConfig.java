@@ -23,7 +23,7 @@ public class GatewayConfig {
         // Auth service routes (no JWT required)
         .route("auth-login", r -> r.path("/auth/**")
             .uri("lb://auth-service"))
-        .route("events-all-public", r -> r.path("/events/all", "/events/nearby", "/events/{id}")
+        .route("events-all-public", r -> r.path("/events/all","/events", "/events/nearby", "/events/{id}")
             .uri("lb://event-service"))
         .route("reviews-all-public", r -> r.path("/reviews", "/reviews/{id}","/reviews/event/{id}")
             .uri("lb://review-service"))
@@ -50,7 +50,7 @@ public class GatewayConfig {
             .uri("lb://registration-service"))
 
         .route("event-service", r -> r.path("/events/**")
-            .and().not(p -> p.path("/events/all", "/events/nearby", "/events/{id}"))
+            .and().not(p -> p.path("/events/all","/events", "/events/nearby", "/events/{id}"))
             .filters(f -> f.filter(filter.apply(new JwtAuthenticationFilter.Config())))
             .uri("lb://event-service"))
 

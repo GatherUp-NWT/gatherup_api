@@ -47,6 +47,8 @@ public class UserController {
         return userService.createUser(userDTO);
     }
 
+
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteUser(@PathVariable String id) {
         return ResponseEntity.ok(userService.deleteUser(id));

@@ -80,7 +80,9 @@ public class AuthService {
         SecurityUser securityUser = (SecurityUser) userDetails;
 
         Map<String, Object> claims = new HashMap<>();
-        claims.put("roles", securityUser.getAuthorities());
+        claims.put("roles", userDetails.getAuthorities().stream()
+            .map(auth ->  auth.getAuthority())
+            .toList());
 
         String newAccessToken = jwtUtil.generateToken(userDetails, claims);
 
