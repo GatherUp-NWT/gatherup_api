@@ -27,8 +27,9 @@ public class GatewayConfig {
             .uri("lb://event-service"))
         .route("reviews-all-public", r -> r.path("/reviews", "/reviews/{id}","/reviews/event/{id}")
             .uri("lb://review-service"))
-
-        .route("auth-service", r -> r.path("/users/**")
+        .route("auth-service-public", r -> r.path("/users").and().method("POST")
+                .uri("lb://auth-service"))
+        .route("auth-service-protected", r -> r.path("/users/**")
             .filters(f -> f.filter(filter.apply(new JwtAuthenticationFilter.Config())))
             .uri("lb://auth-service"))
 

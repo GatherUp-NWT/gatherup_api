@@ -27,8 +27,6 @@ public class UserController {
     }
 
 
-
-
     @GetMapping
     public Page<UserNonSensitiveDTO> getAllUsers(
             @RequestParam(defaultValue = "0") int page,
