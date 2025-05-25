@@ -9,11 +9,13 @@ import org.app.authservice.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.UUID;
 
+@PreAuthorize("hasRole('USER')")
 @RestController
 @RequestMapping("users")
 public class UserController {
@@ -43,6 +45,8 @@ public class UserController {
         return userService.createUser(userDTO);
     }
 
+
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteUser(@PathVariable String id) {
         return ResponseEntity.ok(userService.deleteUser(id));
