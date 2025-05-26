@@ -1,9 +1,6 @@
 package org.app.authservice.service;
 
-import org.app.authservice.dto.UserDTO;
-import org.app.authservice.dto.UserNonSensitiveDTO;
-import org.app.authservice.dto.UserResponseDTO;
-import org.app.authservice.dto.UserUpdateDTO;
+import org.app.authservice.dto.*;
 import org.app.authservice.entity.User;
 import org.app.authservice.respository.UserRepository;
 import org.springframework.data.domain.Page;
@@ -100,7 +97,7 @@ public class UserService {
     }
 
     @Transactional
-    public UserResponseDTO partialUpdateUser(String id, Map<String, Object> updates) {
+    public UserUpdateResponseDTO partialUpdateUser(String id, Map<String, Object> updates) { // Changed return type
         UUID uuid = UUID.fromString(id);
 
         User existingUser = userRepository.findById(uuid)
@@ -118,9 +115,11 @@ public class UserService {
 
         try {
             User savedUser = userRepository.save(existingUser);
-            return userMapperService.toResponseDto(savedUser, "true", "User updated successfully");
+            UserNonSensitiveDTO userDto = userMapperService.toDto(savedUser);
+            return new UserUpdateResponseDTO("true", "User updated successfully", userDto); // Changed to UserUpdateResponseDTO
         } catch (Exception e) {
-            return userMapperService.toResponseDto(existingUser, "false", "Update failed: " + e.getMessage());
+            UserNonSensitiveDTO userDto = userMapperService.toDto(existingUser); // Consider if userDto should be null or existing here
+            return new UserUpdateResponseDTO("false", "Update failed: " + e.getMessage(), userDto); // Changed to UserUpdateResponseDTO
         }
     }
 

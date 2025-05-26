@@ -1,10 +1,7 @@
 package org.app.authservice.controller;
 
 import jakarta.validation.Valid;
-import org.app.authservice.dto.UserDTO;
-import org.app.authservice.dto.UserNonSensitiveDTO;
-import org.app.authservice.dto.UserResponseDTO;
-import org.app.authservice.dto.UserUpdateDTO;
+import org.app.authservice.dto.*;
 import org.app.authservice.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
@@ -40,11 +37,6 @@ public class UserController {
         return userService.getAllUsers(page, size, sort, sortDirection);
     }
 
-    @PostMapping
-    public UserResponseDTO createUser(@Valid @RequestBody UserDTO userDTO) {
-        return userService.createUser(userDTO);
-    }
-
 
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
@@ -63,7 +55,7 @@ public class UserController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<UserResponseDTO> partialUpdateUser(
+    public ResponseEntity<UserUpdateResponseDTO> partialUpdateUser(
             @PathVariable String id,
             @RequestBody Map<String, Object> updates) {
 

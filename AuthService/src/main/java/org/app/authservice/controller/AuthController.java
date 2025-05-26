@@ -2,10 +2,15 @@ package org.app.authservice.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import jakarta.validation.Valid;
 import org.app.authservice.dto.AuthRequest;
 import org.app.authservice.dto.AuthResponse;
+import org.app.authservice.dto.UserDTO;
+import org.app.authservice.dto.UserResponseDTO;
 import org.app.authservice.security.JwtUtils;
 import org.app.authservice.service.AuthService;
+import org.app.authservice.service.UserService;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +22,12 @@ public class AuthController {
 
   private final AuthService authService;
   private final JwtUtils jwtUtil;
+    private final UserService userService;
 
-  public AuthController(AuthService authService, JwtUtils jwtUtil) {
+  public AuthController(AuthService authService, JwtUtils jwtUtil, UserService userService) {
     this.authService = authService;
     this.jwtUtil = jwtUtil;
+    this.userService = userService;
   }
 
   @PostMapping("/login")
@@ -98,6 +105,11 @@ public class AuthController {
     return ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, clearCookie.toString())
             .body(response);
+  }
+
+  @PostMapping("/register")
+  public UserResponseDTO createUser(@Valid @RequestBody UserDTO userDTO) {
+    return userService.createUser(userDTO);
   }
 
 
