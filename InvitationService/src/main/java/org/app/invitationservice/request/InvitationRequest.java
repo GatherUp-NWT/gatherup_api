@@ -13,10 +13,8 @@ import lombok.RequiredArgsConstructor;
 @NotNull
 public class InvitationRequest {
   private UUID senderUserId;
-  private UUID receiverUserId;
   private String receiverEmail;
   private UUID eventId;
-  private String eventName;
   private LocalDateTime sendDate;
 
   public InvitationRequest(UUID senderId, UUID receiverId, UUID eventId) {

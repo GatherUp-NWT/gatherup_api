@@ -172,4 +172,10 @@ public class UserService {
             }
         }
     }
+
+    public UserNonSensitiveDTO getUserByEmail(String email) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + email));
+        return userMapperService.toDto(user);
+    }
 }

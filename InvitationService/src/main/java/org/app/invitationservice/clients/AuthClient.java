@@ -10,5 +10,8 @@ public interface AuthClient {
   @GetMapping("/users/{id}")
   UserDTO getUserById(@PathVariable String id);
 
+  @GetMapping("/users/email/{email}")
+    UserDTO getUserByEmail(@PathVariable String email);
+
 }
 

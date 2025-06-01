@@ -2,13 +2,9 @@
 package org.app.invitationservice.service;
 
 
-import jakarta.transaction.Transactional;
-import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneId;
-import java.util.List;
+
 import lombok.RequiredArgsConstructor;
 import org.app.invitationservice.clients.AuthClient;
 import org.app.invitationservice.clients.EventClient;
@@ -26,7 +22,6 @@ import org.app.invitationservice.response.EventDto;
 import org.app.invitationservice.response.EventResponseDto;
 import org.app.invitationservice.response.InvitationModel;
 import org.app.invitationservice.response.UserDTO;
-import org.app.paymentservice.request.EventDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -54,7 +49,10 @@ public class InvitationService {
   public InvitationModel sendInvitation(InvitationRequest invitationRequest) {
 
     UserDTO sender = authClient.getUserById(invitationRequest.getSenderUserId().toString());
-    UserDTO receiver = authClient.getUserById(invitationRequest.getReceiverUserId().toString());
+    UserDTO receiver = authClient.getUserByEmail(invitationRequest.getReceiverEmail());
+    if (receiver == null) {
+      throw new RuntimeException("Receiver not found with email: " + invitationRequest.getReceiverEmail());
+    }
     EventResponseDto eventResponseDto = eventClient.getEventById(invitationRequest.getEventId().toString());
     EventDto event = eventResponseDto.getEvent();
 
@@ -72,9 +70,6 @@ public class InvitationService {
     invitation.setSendDate(LocalDateTime.now());
     invitation.setInvitationResponseType(InvitationResponseType.PENDING);
     invitation.setStatusInTime(TimeStatus.UPCOMING);
-//    List<Invitation> receivedInvitations = receiverOfInvitation.getReceivedInvitations();
-//    receivedInvitations.add(invitation);
-//    receiverOfInvitation.setReceivedInvitations(receivedInvitations);
 
     userInviteRepository.save(receiverOfInvitation);
 

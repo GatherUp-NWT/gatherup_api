@@ -67,4 +67,9 @@ public class UserController {
 
         return ResponseEntity.ok(userService.partialUpdateUser(id, updates));
     }
+
+    @GetMapping("/email/{email}")
+    public UserNonSensitiveDTO getUserByEmail(@PathVariable String email) {
+        return userService.getUserByEmail(email);
+    }
 }

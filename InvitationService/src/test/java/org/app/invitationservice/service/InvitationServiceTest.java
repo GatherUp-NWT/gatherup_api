@@ -53,7 +53,6 @@ class InvitationServiceTest {
 
     InvitationRequest request = new InvitationRequest(senderId, receiverId, eventId);
     request.setSenderUserId(senderId);
-    request.setReceiverUserId(receiverId);
     request.setEventId(eventId);
 
     UserDTO senderDTO = new UserDTO(senderId, "Alice", "alice@email.com");
