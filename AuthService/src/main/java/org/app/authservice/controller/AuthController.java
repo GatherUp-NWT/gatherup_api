@@ -1,6 +1,8 @@
 package org.app.authservice.controller;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import jakarta.validation.Valid;
@@ -79,6 +81,16 @@ public class AuthController {
           response.put("valid", true);
           response.put("username", username);
           response.put("message", "Token is valid");
+
+          // Extract and add roles to the response
+          try {
+            List<String> roles = jwtUtil.extractRoles(token);
+            response.put("roles", roles);
+          } catch (Exception e) {
+            // If roles can't be extracted, default to empty list
+            response.put("roles", new ArrayList<>());
+          }
+
           return ResponseEntity.ok(response);
         }
       } catch (Exception e) {

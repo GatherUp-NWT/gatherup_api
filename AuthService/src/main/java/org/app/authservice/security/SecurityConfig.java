@@ -2,6 +2,7 @@ package org.app.authservice.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -30,7 +31,19 @@ public class SecurityConfig
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/**","/events", "/events/all", "/events/nearby", "/events/{id}", "/reviews", "/reviews/{id}","/reviews/event/{id}").permitAll()
+                // Public endpoints - accessible to all
+                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/events", "/events/all", "/events/nearby", "/events/{id}").permitAll()
+                .requestMatchers("/reviews", "/reviews/{id}", "/reviews/event/{id}").permitAll()
+
+                // User endpoints - require USER role
+                .requestMatchers(HttpMethod.POST, "/events/**").hasAnyRole("USER", "ADMIN")
+                .requestMatchers(HttpMethod.POST, "/reviews/**").hasAnyRole("USER", "ADMIN")
+
+                // Admin endpoints - require ADMIN role
+                .requestMatchers("/users/admin/**").hasRole("ADMIN")
+
+                // All other endpoints require authentication
                 .anyRequest().authenticated()
             )
 
