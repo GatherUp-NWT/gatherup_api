@@ -34,7 +34,7 @@ public class PaymentController {
     this.paymentService = paymentService;
   }
 
-  @GetMapping("/all")
+  @GetMapping
   public Page<PaymentModel> getPayments(Pageable pageable) {
 
     return paymentService.getAllPayments(pageable);
