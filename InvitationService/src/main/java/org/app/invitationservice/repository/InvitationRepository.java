@@ -2,6 +2,8 @@
 package org.app.invitationservice.repository;
 
 import java.util.Optional;
+import java.util.UUID;
+
 import org.app.invitationservice.entity.Invitation;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +19,7 @@ public interface InvitationRepository extends JpaRepository<Invitation, Long> {
   @Query("SELECT i FROM Invitation i WHERE i.user.id = :userId AND i.event.id = :eventId")
   Invitation findByUserAndEventId(@Param("userId") Long userId, @Param("eventId") Long eventId);
 
-  @Query("SELECT i.receivedInvitations FROM UserInvite i WHERE i.id = :userId")
-  Page<Invitation> getReceivedInvitations(@Param("userId") Long userId, Pageable pageable);
+  @Query("SELECT i.receivedInvitations FROM UserInvite i WHERE i.userId = :userId")
+  Page<Invitation> getReceivedInvitations(@Param("userId") UUID userId, Pageable pageable);
   ;
 }
