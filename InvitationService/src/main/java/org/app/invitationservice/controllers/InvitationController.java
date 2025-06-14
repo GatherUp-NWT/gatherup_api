@@ -1,6 +1,8 @@
 package org.app.invitationservice.controllers;
 
 import java.util.List;
+import java.util.UUID;
+
 import org.app.invitationservice.entity.EventInvite;
 import org.app.invitationservice.entity.Invitation;
 import org.app.invitationservice.entity.UserInvite;
@@ -45,8 +47,10 @@ public class InvitationController {
   }
 
   @GetMapping("/{userId}")
-  public Page<Invitation> getInvitations(@PathVariable Long userId, Pageable pageable) {
-    return invitationService.getAllUserInvitations(userId, pageable);
+  public Page<Invitation> getInvitations(@PathVariable String userId, Pageable pageable) {
+
+    UUID userUUID = UUID.fromString(userId);
+    return invitationService.getAllUserInvitations(userUUID, pageable);
   }
   @PostMapping("/{userId}/{eventId}/{response}")
   public ResponseEntity<String> answerInvitation(@PathVariable Long userId, @PathVariable Long eventId, @PathVariable String response) {
