@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
 import org.app.authservice.dto.AuthRequest;
 import org.app.authservice.dto.AuthResponse;
 import org.app.authservice.dto.UserDTO;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
+@Slf4j
 public class AuthController {
 
   private final AuthService authService;
@@ -86,10 +88,13 @@ public class AuthController {
           try {
             List<String> roles = jwtUtil.extractRoles(token);
             response.put("roles", roles);
+            log.info("Roles extracted from token: {}", roles);
           } catch (Exception e) {
             // If roles can't be extracted, default to empty list
             response.put("roles", new ArrayList<>());
+            log.warn("Failed to extract roles from token: {}", e.getMessage());
           }
+          log.info("Token validation successful {}", response);
 
           return ResponseEntity.ok(response);
         }

@@ -4,15 +4,14 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import java.util.List;
+
+import java.util.*;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Function;
 
 @Component
@@ -59,10 +58,31 @@ public class JwtUtils {
 
   public List<String> extractRoles(String token) {
     Claims claims = extractAllClaims(token);
-    List<Map<String, String>> roles = (List<Map<String, String>>) claims.get("roles");
-    return roles.stream()
-        .map(roleMap -> roleMap.get("authority"))
-        .toList();
+    Object rolesObj = claims.get("roles");
+
+      return switch (rolesObj) {
+
+
+          // Handle different possible formats
+          case List<?> rolesList -> rolesList.stream()
+                  .map(role -> {
+                      if (role instanceof String) {
+                          return (String) role;
+                      } else if (role instanceof Map<?, ?> roleMap) {
+                          // Handle case where roles are stored as authority objects
+                          return (String) roleMap.get("authority");
+                      } else {
+                          return role.toString();
+                      }
+                  })
+                  .toList();
+
+
+          // Fallback for single role as string
+          case String s -> List.of(s);
+          case null, default -> new ArrayList<>();
+      };
+
   }
 
   private Boolean isTokenExpired(String token) {

@@ -38,7 +38,7 @@ public class UserController {
     }
 
     // Admin endpoints - require ADMIN role
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteUser(@PathVariable String id) {
         return ResponseEntity.ok(userService.deleteUser(id));
