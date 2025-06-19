@@ -104,6 +104,27 @@ public class EventService {
     }
 
     @Transactional
+    public EventResponseDTO updateEventWithImage(EventUpdateDTO eventUpdateDTO, MultipartFile image) {
+        if (eventUpdateDTO.getStartDate().isAfter(eventUpdateDTO.getEndDate())) {
+            throw new IllegalArgumentException("Event start date cannot be after end date");
+        }
+
+        Event existingEvent = eventRepository.findById(eventUpdateDTO.getUuid())
+                .orElseThrow(() -> new IllegalArgumentException("Event not found"));
+
+        Event updatedEvent = eventMapper.updateEventFromUpdateDTO(eventUpdateDTO, existingEvent);
+        updatedEvent = eventRepository.save(updatedEvent);
+
+        if (image != null && !image.isEmpty()) {
+            String imageUrl = supabaseStorageService.uploadImage(image, updatedEvent.getUuid());
+            updatedEvent.setEventBannerUrl(imageUrl);
+            updatedEvent = eventRepository.save(updatedEvent);
+        }
+
+        return eventMapper.toResponseDto(updatedEvent, true, "Event updated successfully");
+    }
+
+    @Transactional
     public EventResponseDTO deleteEvent(String eventId) {
         UUID eventUUID = UUID.fromString(eventId);
         Event event = eventRepository.findById(eventUUID).orElseThrow(() -> new IllegalArgumentException("Event not found"));
