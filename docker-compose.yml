@@ -1,4 +1,46 @@
 services:
+  # Infrastructure Services
+  config-server:
+    build: ./ConfigServer
+    ports:
+      - "8888:8888"
+    environment:
+      - GITHUB_USERNAME=your_github_username
+      - GITHUB_TOKEN=your_github_token
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8888/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  eureka-server:
+    build: ./EurekaServer
+    ports:
+      - "8761:8761"
+    environment:
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+    depends_on:
+      config-server:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api-gateway:
+    build: ./ApiGateway
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+
+  # Message Broker
   rabbitmq:
     image: rabbitmq:4.1.0-management
     ports:
@@ -9,6 +51,103 @@ services:
       - RABBITMQ_DEFAULT_PASS=guest
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Business Services
+  auth-service:
+    build: ./AuthService
+    environment:
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+      - SPRING_PROFILES_ACTIVE=dev
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  event-service:
+    build: ./EventService
+    environment:
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+      - SPRING_PROFILES_ACTIVE=dev
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  invitation-service:
+    build: ./InvitationService
+    environment:
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+      - SPRING_PROFILES_ACTIVE=dev
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  payment-service:
+    build: ./PaymentService
+    environment:
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+      - SPRING_PROFILES_ACTIVE=dev
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  registration-service:
+    build: ./RegistrationService
+    environment:
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+      - SPRING_PROFILES_ACTIVE=dev
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  review-service:
+    build: ./ReviewService
+    environment:
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+      - SPRING_PROFILES_ACTIVE=dev
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  system-events-service:
+    build: ./SystemEventsService
+    environment:
+      - SPRING_CONFIG_IMPORT=configserver:http://config-server:8888
+      - SPRING_PROFILES_ACTIVE=dev
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
 
 volumes:
   rabbitmq_data:
