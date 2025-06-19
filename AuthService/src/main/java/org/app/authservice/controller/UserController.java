@@ -60,14 +60,14 @@ public class UserController {
     }
 
     // User can update their own profile
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('ADMIN')")
     @PutMapping("/{id}")
     public UserResponseDTO updateUser(@PathVariable String id, @Valid @RequestBody UserUpdateDTO userDTO) {
         return userService.updateUser(id, userDTO);
     }
 
     // Anyone with USER role can view user profiles
-    @PreAuthorize("hasRole('USER')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     @GetMapping("/{id}")
     public UserNonSensitiveDTO getUserById(@PathVariable String id) {
         return userService.getUserById(id);

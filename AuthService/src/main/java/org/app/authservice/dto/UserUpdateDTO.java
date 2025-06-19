@@ -31,5 +31,7 @@ public class UserUpdateDTO {
 
     @Size(max = 100, message = "Bio should be at most 100 characters")
     private String bio;
+
+    private String role = "USER";
 }
 

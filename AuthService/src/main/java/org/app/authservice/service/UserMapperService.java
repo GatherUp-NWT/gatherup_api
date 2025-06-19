@@ -17,10 +17,13 @@ import java.util.List;
 public class UserMapperService {
     private final ModelMapper modelMapper;
     private final PasswordEncoder passwordEncoder;
+    private final RoleRepository roleRepository;
 
     public UserMapperService(ModelMapper modelMapper, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
         this.modelMapper = modelMapper;
         this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
+
 
         modelMapper.createTypeMap(User.class, UserNonSensitiveDTO.class).addMappings(mapper -> mapper.skip(UserNonSensitiveDTO::setRole)).setPostConverter(context -> {
             User source = context.getSource();
@@ -80,6 +83,13 @@ public class UserMapperService {
 
     public User mapForUpdate(UserUpdateDTO userDTO, User existingUser) {
         modelMapper.getConfiguration().setSkipNullEnabled(true);
+
+        if (userDTO.getRole() != null) {
+            Role role = roleRepository.findByName(userDTO.getRole())
+                    .orElseThrow(() -> new IllegalArgumentException("Role not found: " + userDTO.getRole()));
+            existingUser.setRole(role);
+        }
+
 
         User userCopy = new User();
         modelMapper.map(existingUser, userCopy);
