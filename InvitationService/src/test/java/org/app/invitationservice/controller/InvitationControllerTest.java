@@ -90,7 +90,7 @@ class InvitationControllerTest {
     Invitation invitation = new Invitation(); // minimal mock
     Page<Invitation> page = new PageImpl<>(List.of(invitation));
 
-    Mockito.when(invitationService.getAllUserInvitations(eq(1L), any(PageRequest.class)))
+    Mockito.when(invitationService.getAllUserInvitations(eq(UUID.class).newInstance(), any(PageRequest.class)))
         .thenReturn(page);
 
     mockMvc.perform(get("/api/v1/invitations/1?page=0&size=10"))

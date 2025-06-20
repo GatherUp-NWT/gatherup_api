@@ -41,7 +41,7 @@ public class SecurityConfig
                 .requestMatchers(HttpMethod.POST, "/reviews/**").hasAnyRole("USER", "ADMIN")
 
                 // Admin endpoints - require ADMIN role
-                .requestMatchers("/users/admin/**").hasRole("ADMIN")
+                .requestMatchers("/users/admin/**").hasAnyRole("ADMIN")
 
                 // All other endpoints require authentication
                 .anyRequest().authenticated()

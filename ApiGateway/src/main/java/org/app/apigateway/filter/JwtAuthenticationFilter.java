@@ -9,11 +9,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Map;
 
 @Component
+@Slf4j
 public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAuthenticationFilter.Config> {
 
   private final WebClient.Builder webClientBuilder;
@@ -62,8 +64,9 @@ public class JwtAuthenticationFilter extends AbstractGatewayFilterFactory<JwtAut
             @SuppressWarnings("unchecked")
             List<String> roles = (List<String>) response.get("roles");
 
-            // Admin endpoints - require ADMIN role
+              // Admin endpoints - require ADMIN role
             if (path.contains("/admin/") && !hasRole(roles, "ROLE_ADMIN")) {
+                log.warn("Access denied for admin endpoint: {}", path);
               return onError(exchange, "Access denied", HttpStatus.FORBIDDEN);
             }
 

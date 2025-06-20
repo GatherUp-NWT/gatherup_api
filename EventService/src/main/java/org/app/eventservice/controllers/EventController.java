@@ -88,7 +88,6 @@ public class EventController {
 
     // Get upcoming events
 
-
     // Get all events by status
 
     // Create event
@@ -183,7 +182,20 @@ public class EventController {
         }
     }
 
-
-
-
+    @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public EventResponseDTO updateEventWithImage(
+            @RequestPart("eventData") String eventDataJson,
+            @RequestPart(value = "image", required = false) MultipartFile image
+    ) {
+        try {
+            EventUpdateDTO eventUpdateDTO = objectMapper.readValue(eventDataJson, EventUpdateDTO.class);
+            return eventService.updateEventWithImage(eventUpdateDTO, image);
+        } catch (IOException e) {
+            log.error("Error parsing event update data: {}", e.getMessage());
+            throw new ResponseStatusException(
+                    HttpStatus.BAD_REQUEST,
+                    "Invalid event update data format: " + e.getMessage()
+            );
+        }
+    }
 }

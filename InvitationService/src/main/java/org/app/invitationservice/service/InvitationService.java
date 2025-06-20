@@ -4,6 +4,7 @@ package org.app.invitationservice.service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.UUID;
 
 import lombok.RequiredArgsConstructor;
 import org.app.invitationservice.clients.AuthClient;
@@ -84,16 +85,9 @@ public class InvitationService {
     );
   }
 
-  public Page<Invitation> getAllUserInvitations(Long userId, Pageable pageable) {
-    UserInvite user = userInviteRepository.findById(userId)
-        .orElseThrow(() -> new RuntimeException("User not found"));
+  public Page<Invitation> getAllUserInvitations(UUID userId, Pageable pageable) {
 
-    Page<Invitation> userInvitations = invitationRepository.getReceivedInvitations(userId, pageable);
-
-    if (userInvitations.isEmpty()) {
-      throw new RuntimeException("No invitations found");
-    }
-    return userInvitations;
+      return invitationRepository.getReceivedInvitations(userId, pageable);
   }
 
 
